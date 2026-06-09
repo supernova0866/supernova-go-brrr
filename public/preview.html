@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preview — supernova0866</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #21262d;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --purple: #a371f7;
+      --orange: #f78166;
+      --yellow: #e3b341;
+      --accent: #388bfd;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: 220px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto;
+    }
+    #sidebar-header { padding: 1.25rem 1rem; border-bottom: 1px solid var(--border); }
+    #sidebar-header h1 { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    #sidebar-header span { font-size: 0.7rem; color: var(--muted); }
+    .nav-section { padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .nav-label { font-size: 0.65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 1rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; font-size: 0.78rem; color: var(--muted); cursor: pointer; transition: all 0.1s; border-left: 2px solid transparent; }
+    .nav-item:hover { color: var(--text); background: #ffffff08; }
+    .nav-item.active { color: var(--blue); border-left-color: var(--blue); background: #388bfd10; }
+    .nav-item .code { font-family: monospace; font-size: 0.65rem; color: var(--muted); margin-left: auto; }
+    .nav-item.active .code { color: var(--blue); }
+
+    /* MAIN */
+    #main { flex: 1; overflow-y: auto; padding: 2rem; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* CARD EDITOR */
+    .editor-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 1.5rem; overflow: hidden;
+    }
+    .editor-card-header {
+      display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border); background: #0d111780;
+    }
+    .editor-card-header h2 { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .code-badge { font-family: monospace; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #0d1117; border: 1px solid var(--border); color: var(--muted); }
+    .tag { font-size: 0.65rem; padding: 2px 7px; border-radius: 999px; font-weight: 500; }
+    .tag.static { background: #1f3a2a; color: var(--green); border: 1px solid #238636; }
+    .tag.dynamic { background: #1a2a3f; color: var(--blue); border: 1px solid #1f6feb; }
+
+    .editor-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .controls-panel { padding: 1.25rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 1rem; }
+    .preview-panel { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; background: #0d111750; }
+
+    /* CONTROLS */
+    .control-row { display: flex; flex-direction: column; gap: 0.3rem; }
+    .control-row label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+    .control-row input[type="text"],
+    .control-row input[type="number"],
+    .control-row textarea {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 5px;
+      color: var(--text); font-family: monospace; font-size: 0.78rem; padding: 0.4rem 0.6rem;
+      width: 100%; outline: none; transition: border-color 0.15s;
+    }
+    .control-row input:focus, .control-row textarea:focus { border-color: var(--accent); }
+    .control-row textarea { resize: vertical; min-height: 60px; }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .toggle-row label { font-size: 0.78rem; color: var(--text); }
+    .toggle { position: relative; width: 36px; height: 20px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: 0.2s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px;
+      background: var(--muted); border-radius: 50%; transition: 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--green); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(16px); background: white; }
+
+    .slider-row { display: flex; flex-direction: column; gap: 0.3rem; }
+    .slider-row label { font-size: 0.72rem; color: var(--muted); font-weight: 500; display: flex; justify-content: space-between; }
+    .slider-row input[type="range"] { width: 100%; accent-color: var(--blue); }
+
+    /* THEME PICKER */
+    .theme-picker { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .theme-btn {
+      font-family: monospace; font-size: 0.68rem; padding: 3px 8px; border-radius: 4px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg); color: var(--muted); transition: all 0.15s;
+    }
+    .theme-btn:hover { border-color: var(--accent); color: var(--text); }
+    .theme-btn.active { border-color: var(--blue); color: var(--blue); background: #388bfd15; }
+
+    /* VARIANT PICKER */
+    .variant-picker { display: flex; gap: 0.4rem; }
+    .variant-btn {
+      font-family: monospace; font-size: 0.68rem; padding: 3px 8px; border-radius: 4px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg); color: var(--muted); transition: all 0.15s;
+    }
+    .variant-btn:hover { border-color: var(--accent); color: var(--text); }
+    .variant-btn.active { border-color: var(--purple); color: var(--purple); background: #a371f715; }
+
+    /* ICON PICKER */
+    .icon-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .icon-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 0.4rem 0.5rem; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--bg); cursor: pointer; transition: all 0.15s; min-width: 48px;
+    }
+    .icon-chip:hover { border-color: var(--muted); }
+    .icon-chip.selected { border-color: var(--blue); background: #388bfd15; }
+    .icon-chip .icon-sym { font-size: 1rem; line-height: 1; }
+    .icon-chip .icon-label { font-family: monospace; font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
+    .icon-chip.selected .icon-label { color: var(--blue); }
+
+    /* PREVIEW AREA */
+    .preview-frame {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 1rem; display: flex; align-items: center; justify-content: center;
+      min-height: 100px; overflow: hidden; flex: 1;
+    }
+    .preview-frame svg { max-width: 100%; }
+    .preview-meta { font-family: monospace; font-size: 0.65rem; color: var(--muted); }
+    .preview-meta span { color: var(--blue); }
+
+    /* SVG THEMES */
+    .theme-TD { --svg-bg: #161b22; --svg-surface: #0d1117; --svg-border: #21262d; --svg-text: #e6edf3; --svg-muted: #7d8590; --svg-accent: #58a6ff; }
+    .theme-TL { --svg-bg: #ffffff; --svg-surface: #f6f8fa; --svg-border: #d0d7de; --svg-text: #1f2328; --svg-muted: #656d76; --svg-accent: #0969da; }
+    .theme-TT { --svg-bg: #0a0a0a; --svg-surface: #111111; --svg-border: #00ff4133; --svg-text: #00ff41; --svg-muted: #00aa2a; --svg-accent: #00ff41; }
+    .theme-TI { --svg-bg: #fdf6e3; --svg-surface: #eee8d5; --svg-border: #d3c9a1; --svg-text: #657b83; --svg-muted: #93a1a1; --svg-accent: #268bd2; }
+
+    /* SECTION DIVIDER */
+    .section-divider { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; margin-top: 0.5rem; }
+    .section-divider h2 { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+    .section-divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+
+    /* APPLY BAR */
+    #apply-bar {
+      position: fixed; bottom: 0; left: 220px; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between;
+      z-index: 100;
+    }
+    #apply-bar span { font-size: 0.78rem; color: var(--muted); }
+    #apply-btn {
+      background: var(--green); color: #000; border: none; border-radius: 6px;
+      padding: 0.45rem 1.5rem; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    #apply-btn:hover { opacity: 0.85; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .editor-body { grid-template-columns: 1fr; }
+      .controls-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+
+    .url-pill {
+      font-family: monospace; font-size: 0.65rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px;
+      color: var(--muted); word-break: break-all;
+    }
+    .url-pill span { color: var(--blue); }
+
+    /* Disable overlay */
+    .disabled-overlay { opacity: 0.4; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <h1>SVG Generator</h1>
+    <span>supernova0866 · preview</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Banners</div>
+    <div class="nav-item active" onclick="showPage('bnr')">Typing Banner <span class="code">BNR</span></div>
+    <div class="nav-item" onclick="showPage('bnr-hero')">Hero Banner <span class="code">BNR</span></div>
+    <div class="nav-item" onclick="showPage('bnr-wave')">Wave Banner <span class="code">BNR</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Stats</div>
+    <div class="nav-item" onclick="showPage('ghs')">GitHub Stats <span class="code">GHS</span></div>
+    <div class="nav-item" onclick="showPage('stk')">Streak <span class="code">STK</span></div>
+    <div class="nav-item" onclick="showPage('tpl')">Top Languages <span class="code">TPL</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Profile</div>
+    <div class="nav-item" onclick="showPage('prf')">Profile Card <span class="code">PRF</span></div>
+    <div class="nav-item" onclick="showPage('cwo')">Currently Working On <span class="code">CWO</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Setup</div>
+    <div class="nav-item" onclick="showPage('dvs')">Dev Setup <span class="code">DVS</span></div>
+    <div class="nav-item" onclick="showPage('bgs')">Badges <span class="code">BGS</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Social</div>
+    <div class="nav-item" onclick="showPage('scl')">Social Links <span class="code">SCL</span></div>
+    <div class="nav-item" onclick="showPage('vsc')">Visitor Counter <span class="code">VSC</span></div>
+    <div class="nav-item" onclick="showPage('cbt')">Custom Buttons <span class="code">CBT</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Images</div>
+    <div class="nav-item" onclick="showPage('img')">Image Banner <span class="code">IMG</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Live</div>
+    <div class="nav-item" onclick="showPage('dcs')">Discord <span class="code">DCS</span></div>
+    <div class="nav-item" onclick="showPage('spt')">Spotify <span class="code">SPT</span></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main" style="padding-bottom: 60px;">
+
+  <!-- BNR: TYPING BANNER -->
+  <div id="page-bnr" class="page active">
+    <div class="section-divider"><h2>Typing Banner</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Animated Typing Banner</h2>
+        <span class="code-badge" id="bnr-code-badge">BNR01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="bnr-enabled" checked onchange="renderBNR()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="bnr-controls">
+            <div class="control-row" style="margin-bottom:1rem;">
+              <label>Tagline (below username)</label>
+              <input type="text" id="bnr-tagline" value="full-stack dev · open source · building things" oninput="renderBNR()" />
+            </div>
+            <div class="slider-row" style="margin-bottom:1rem;">
+              <label>Type speed (ms/char) <span id="bnr-speed-val">100</span>ms</label>
+              <input type="range" id="bnr-speed" min="40" max="300" value="100" oninput="document.getElementById('bnr-speed-val').textContent=this.value; renderBNR();" />
+            </div>
+            <div class="slider-row" style="margin-bottom:1rem;">
+              <label>Backspace speed (ms/char) <span id="bnr-bspeed-val">60</span>ms</label>
+              <input type="range" id="bnr-bspeed" min="20" max="200" value="60" oninput="document.getElementById('bnr-bspeed-val').textContent=this.value;" />
+            </div>
+            <div class="slider-row" style="margin-bottom:1rem;">
+              <label>Pause after typing (ms) <span id="bnr-pause-val">1200</span>ms</label>
+              <input type="range" id="bnr-pause" min="300" max="4000" step="100" value="1200" oninput="document.getElementById('bnr-pause-val').textContent=this.value;" />
+            </div>
+            <div class="control-row" style="margin-bottom:1rem;">
+              <label>Variant</label>
+              <div class="variant-picker">
+                <button class="variant-btn active" onclick="setVariant('bnr',1,this)">01 — Centered</button>
+                <button class="variant-btn" onclick="setVariant('bnr',2,this)">02 — Left-aligned</button>
+              </div>
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker" id="bnr-themes">
+                <button class="theme-btn active" onclick="setTheme('bnr','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('bnr','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('bnr','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('bnr','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="bnr-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/banner/<span id="bnr-url-code">BNR01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BNR: HERO BANNER -->
+  <div id="page-bnr-hero" class="page">
+    <div class="section-divider"><h2>Hero Banner</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Static Hero Banner</h2>
+        <span class="code-badge" id="bnr-hero-code-badge">BNR02TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="bnr-hero-enabled" checked onchange="renderBNRHero()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="bnr-hero-controls">
+            <div class="control-row" style="margin-bottom:1rem; margin-top:1rem;">
+              <label>Tagline</label>
+              <input type="text" id="bnr-hero-tagline" value="Full-stack Developer · Open Source Enthusiast" oninput="renderBNRHero()" />
+            </div>
+            <div class="control-row" style="margin-bottom:1rem;">
+              <label>Status text</label>
+              <input type="text" id="bnr-hero-status" value="available for collaboration" oninput="renderBNRHero()" />
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('bnr-hero','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('bnr-hero','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('bnr-hero','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('bnr-hero','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="bnr-hero-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/banner/<span id="bnr-hero-url-code">BNR02TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BNR: WAVE BANNER -->
+  <div id="page-bnr-wave" class="page">
+    <div class="section-divider"><h2>Wave Banner</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Wave Banner</h2>
+        <span class="code-badge">BNR03TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="bnr-wave-enabled" checked onchange="renderBNRWave()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="bnr-wave-controls">
+            <div class="control-row" style="margin-bottom:1rem;margin-top:1rem;">
+              <label>Tagline</label>
+              <input type="text" id="bnr-wave-tagline" value="full-stack · open source · builder" oninput="renderBNRWave()" />
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('bnr-wave','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('bnr-wave','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('bnr-wave','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('bnr-wave','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="bnr-wave-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/banner/<span>BNR03TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GHS: GITHUB STATS -->
+  <div id="page-ghs" class="page">
+    <div class="section-divider"><h2>GitHub Stats</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>GitHub Stats Card</h2>
+        <span class="code-badge">GHS01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="ghs-enabled" checked onchange="renderGHS()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="ghs-controls" style="margin-top:1rem;">
+            <div class="control-row" style="margin-bottom:1rem;">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('ghs','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('ghs','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('ghs','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('ghs','TI',this)">TI ivory</button>
+              </div>
+            </div>
+            <p style="font-size:0.72rem;color:var(--muted);line-height:1.5;">Stats are fetched live from the GitHub API using your OAuth token on each request. No manual input needed.</p>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="ghs-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/stats/<span>GHS01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STK: STREAK -->
+  <div id="page-stk" class="page">
+    <div class="section-divider"><h2>Streak</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Streak Card</h2>
+        <span class="code-badge">STK01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="stk-enabled" checked onchange="renderSTK()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="stk-controls" style="margin-top:1rem;">
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('stk','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('stk','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('stk','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('stk','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="stk-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/stats/<span>STK01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TPL: TOP LANGUAGES -->
+  <div id="page-tpl" class="page">
+    <div class="section-divider"><h2>Top Languages</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Top Languages Card</h2>
+        <span class="code-badge">TPL01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="tpl-enabled" checked onchange="renderTPL()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="tpl-controls" style="margin-top:1rem;">
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('tpl','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('tpl','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('tpl','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('tpl','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="tpl-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/stats/<span>TPL01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRF: PROFILE CARD -->
+  <div id="page-prf" class="page">
+    <div class="section-divider"><h2>Profile Card</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Full Profile Card</h2>
+        <span class="code-badge">PRF01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="prf-enabled" checked onchange="renderPRF()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="prf-controls">
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Location</label>
+              <input type="text" id="prf-location" value="Earth" oninput="renderPRF()" />
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Bio</label>
+              <textarea id="prf-bio" oninput="renderPRF()">Building cool stuff in the open.</textarea>
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>GitHub username</label>
+              <input type="text" id="prf-github" value="supernova0866" oninput="renderPRF()" />
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Discord handle</label>
+              <input type="text" id="prf-discord" value="supernova0866" oninput="renderPRF()" />
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('prf','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('prf','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('prf','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('prf','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="prf-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/profile/<span>PRF01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CWO: CURRENTLY WORKING ON -->
+  <div id="page-cwo" class="page">
+    <div class="section-divider"><h2>Currently Working On</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Currently Working On</h2>
+        <span class="code-badge">CWO01TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="cwo-enabled" checked onchange="renderCWO()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="cwo-controls">
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Project name</label>
+              <input type="text" id="cwo-project" value="GitHub Profile Generator" oninput="renderCWO()" />
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Description</label>
+              <textarea id="cwo-desc" oninput="renderCWO()">A tool to generate custom SVG cards for GitHub profile READMEs</textarea>
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('cwo','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('cwo','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('cwo','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('cwo','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="cwo-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/profile/<span>CWO01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DVS: DEV SETUP -->
+  <div id="page-dvs" class="page">
+    <div class="section-divider"><h2>Dev Setup</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Dev Setup Card</h2>
+        <span class="code-badge" id="dvs-code-badge">DVS01TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="dvs-enabled" checked onchange="renderDVS()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="dvs-controls">
+            <div class="control-row" style="margin-bottom:1rem;">
+              <label>Variant</label>
+              <div class="variant-picker">
+                <button class="variant-btn active" onclick="setVariant('dvs',1,this); renderDVS()">01 — Icons</button>
+                <button class="variant-btn" onclick="setVariant('dvs',2,this); renderDVS()">02 — Badges</button>
+                <button class="variant-btn" onclick="setVariant('dvs',3,this); renderDVS()">03 — Grid</button>
+              </div>
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Software <span style="color:var(--muted);font-size:0.65rem;">(click to toggle)</span></label>
+              <div class="icon-grid" id="dvs-software">
+                <div class="icon-chip selected" data-cat="software" data-val="vscode" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#007ACC">VS</span><span class="icon-label">VS Code</span></div>
+                <div class="icon-chip selected" data-cat="software" data-val="replit" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#F26207">R</span><span class="icon-label">Replit</span></div>
+                <div class="icon-chip" data-cat="software" data-val="cursor" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#a371f7">▌</span><span class="icon-label">Cursor</span></div>
+                <div class="icon-chip" data-cat="software" data-val="neovim" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#3fb950">NV</span><span class="icon-label">Neovim</span></div>
+                <div class="icon-chip" data-cat="software" data-val="jetbrains" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#f78166">JB</span><span class="icon-label">JetBrains</span></div>
+                <div class="icon-chip" data-cat="software" data-val="zed" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#58a6ff">Z</span><span class="icon-label">Zed</span></div>
+              </div>
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Languages</label>
+              <div class="icon-grid" id="dvs-languages">
+                <div class="icon-chip selected" data-cat="languages" data-val="python" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#3572A5">Py</span><span class="icon-label">Python</span></div>
+                <div class="icon-chip selected" data-cat="languages" data-val="javascript" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#F7DF1E">JS</span><span class="icon-label">JS</span></div>
+                <div class="icon-chip selected" data-cat="languages" data-val="typescript" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#3178c6">TS</span><span class="icon-label">TS</span></div>
+                <div class="icon-chip" data-cat="languages" data-val="rust" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#dea584">Rs</span><span class="icon-label">Rust</span></div>
+                <div class="icon-chip" data-cat="languages" data-val="go" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#00ADD8">Go</span><span class="icon-label">Go</span></div>
+                <div class="icon-chip" data-cat="languages" data-val="cpp" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#f34b7d">C++</span><span class="icon-label">C++</span></div>
+                <div class="icon-chip" data-cat="languages" data-val="lua" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#000080">Lu</span><span class="icon-label">Lua</span></div>
+                <div class="icon-chip" data-cat="languages" data-val="ruby" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#CC342D">Rb</span><span class="icon-label">Ruby</span></div>
+              </div>
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>OS</label>
+              <div class="icon-grid" id="dvs-os">
+                <div class="icon-chip selected" data-cat="os" data-val="windows" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#0078D4">⊞</span><span class="icon-label">Windows</span></div>
+                <div class="icon-chip" data-cat="os" data-val="linux" onclick="toggleIcon(this)"><span class="icon-sym">🐧</span><span class="icon-label">Linux</span></div>
+                <div class="icon-chip" data-cat="os" data-val="macos" onclick="toggleIcon(this)"><span class="icon-sym">🍎</span><span class="icon-label">macOS</span></div>
+                <div class="icon-chip" data-cat="os" data-val="ubuntu" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#E95420">Ub</span><span class="icon-label">Ubuntu</span></div>
+                <div class="icon-chip" data-cat="os" data-val="arch" onclick="toggleIcon(this)"><span class="icon-sym" style="color:#1793d1">Ar</span><span class="icon-label">Arch</span></div>
+              </div>
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('dvs','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('dvs','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('dvs','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('dvs','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="dvs-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/setup/<span id="dvs-url-code">DVS01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCL: SOCIAL LINKS -->
+  <div id="page-scl" class="page">
+    <div class="section-divider"><h2>Social Links</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Social Links Row</h2>
+        <span class="code-badge">SCL01TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="scl-enabled" checked onchange="renderSCL()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="scl-controls">
+            <div class="control-row" style="margin-bottom:0.75rem;"><label>GitHub</label><input type="text" id="scl-github" value="supernova0866" oninput="renderSCL()" /></div>
+            <div class="control-row" style="margin-bottom:0.75rem;"><label>Discord</label><input type="text" id="scl-discord" value="supernova0866" oninput="renderSCL()" /></div>
+            <div class="control-row" style="margin-bottom:0.75rem;"><label>Twitter</label><input type="text" id="scl-twitter" value="" placeholder="leave empty to hide" oninput="renderSCL()" /></div>
+            <div class="control-row" style="margin-bottom:1rem;"><label>LinkedIn</label><input type="text" id="scl-linkedin" value="" placeholder="leave empty to hide" oninput="renderSCL()" /></div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('scl','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('scl','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('scl','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('scl','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="scl-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/social/<span>SCL01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VSC: VISITOR COUNTER -->
+  <div id="page-vsc" class="page">
+    <div class="section-divider"><h2>Visitor Counter</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Visitor Counter</h2>
+        <span class="code-badge">VSC01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="vsc-enabled" checked onchange="renderVSC()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="vsc-controls">
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('vsc','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('vsc','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('vsc','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('vsc','TI',this)">TI ivory</button>
+              </div>
+            </div>
+            <p style="margin-top:1rem;font-size:0.72rem;color:var(--muted);line-height:1.5;">Count is stored in your profile JSON and incremented server-side on every request to this SVG.</p>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="vsc-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/social/<span>VSC01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BGS: BADGES -->
+  <div id="page-bgs" class="page">
+    <div class="section-divider"><h2>Badges</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Shields.io-style Badges</h2>
+        <span class="code-badge" id="bgs-code-badge">BGS01TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="bgs-enabled" checked onchange="renderBGS()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="bgs-controls">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
+              <label style="font-size:0.72rem;color:var(--muted);font-weight:500;">Badges <span style="font-size:0.65rem;">(left label · right label · hex color)</span></label>
+              <button onclick="addBGS()" style="font-size:0.68rem;padding:2px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--blue);cursor:pointer;">+ Add</button>
+            </div>
+            <div id="bgs-list" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('bgs','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('bgs','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('bgs','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('bgs','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="bgs-preview" style="min-height:60px; flex-wrap:wrap; gap:0.5rem; align-items:flex-start; justify-content:flex-start;"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/badges/<span>BGS01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CBT: CUSTOM BUTTONS -->
+  <div id="page-cbt" class="page">
+    <div class="section-divider"><h2>Custom Buttons</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Custom Buttons</h2>
+        <span class="code-badge">CBT01TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="cbt-enabled" checked onchange="renderCBT()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="cbt-controls">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
+              <label style="font-size:0.72rem;color:var(--muted);font-weight:500;">Buttons <span style="font-size:0.65rem;">(label · hex color · url)</span></label>
+              <button onclick="addCBT()" style="font-size:0.68rem;padding:2px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--blue);cursor:pointer;">+ Add</button>
+            </div>
+            <div id="cbt-list" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('cbt','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('cbt','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('cbt','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('cbt','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="cbt-preview" style="min-height:60px;"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/social/<span>CBT01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMG: IMAGE BANNER -->
+  <div id="page-img" class="page">
+    <div class="section-divider"><h2>Image Banner</h2><hr /></div>
+
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Single Image</h2>
+        <span class="code-badge">IMG01TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="img1-enabled" checked onchange="renderIMG1()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="img1-controls">
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Image URL (Discord CDN, Imgur, etc.)</label>
+              <input type="text" id="img1-url" placeholder="https://i.imgur.com/example.png" oninput="renderIMG1()" />
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+              <div class="control-row" style="flex:1;">
+                <label>Width (px)</label>
+                <input type="number" id="img1-w" value="600" min="100" max="1200" oninput="renderIMG1()" />
+              </div>
+              <div class="control-row" style="flex:1;">
+                <label>Height (px)</label>
+                <input type="number" id="img1-h" value="200" min="50" max="800" oninput="renderIMG1()" />
+              </div>
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Corner radius (px)</label>
+              <input type="number" id="img1-r" value="8" min="0" max="40" oninput="renderIMG1()" />
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('img1','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('img1','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('img1','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('img1','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="img1-preview" style="min-height:120px;"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/image/<span>IMG01TD</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-card" style="margin-top:1rem;">
+      <div class="editor-card-header">
+        <h2>Image Grid</h2>
+        <span class="code-badge">IMG02TD</span>
+        <span class="tag static">static</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="img2-enabled" checked onchange="renderIMG2()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="img2-controls">
+            <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+              <div class="control-row" style="flex:1;">
+                <label>Columns</label>
+                <input type="number" id="img2-cols" value="3" min="1" max="6" oninput="renderIMG2()" />
+              </div>
+              <div class="control-row" style="flex:1;">
+                <label>Cell width (px)</label>
+                <input type="number" id="img2-cw" value="180" min="80" max="400" oninput="renderIMG2()" />
+              </div>
+              <div class="control-row" style="flex:1;">
+                <label>Cell height (px)</label>
+                <input type="number" id="img2-ch" value="120" min="50" max="400" oninput="renderIMG2()" />
+              </div>
+            </div>
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Gap (px)</label>
+              <input type="number" id="img2-gap" value="8" min="0" max="40" oninput="renderIMG2()" />
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+              <label style="font-size:0.72rem;color:var(--muted);font-weight:500;">Image URLs</label>
+              <button onclick="addIMG2()" style="font-size:0.68rem;padding:2px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--blue);cursor:pointer;">+ Add</button>
+            </div>
+            <div id="img2-list" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('img2','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('img2','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('img2','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('img2','TI',this)">TI ivory</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="img2-preview" style="min-height:160px;"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/image/<span>IMG02TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DCS: DISCORD -->
+  <div id="page-dcs" class="page">
+    <div class="section-divider"><h2>Discord</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Discord Presence Card</h2>
+        <span class="code-badge">DCS01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="dcs-enabled" checked onchange="renderDCS()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="dcs-controls">
+            <div class="control-row" style="margin-bottom:0.75rem;">
+              <label>Discord User ID</label>
+              <input type="text" id="dcs-uid" value="" placeholder="e.g. 123456789012345678" oninput="renderDCS()" />
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('dcs','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('dcs','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('dcs','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('dcs','TI',this)">TI ivory</button>
+              </div>
+            </div>
+            <p style="margin-top:1rem;font-size:0.72rem;color:var(--muted);line-height:1.5;">Powered by <strong style="color:var(--text)">Lanyard API</strong>. You need to be in the Lanyard Discord server for presence tracking to work.</p>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="dcs-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/discord/<span>DCS01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPT: SPOTIFY -->
+  <div id="page-spt" class="page">
+    <div class="section-divider"><h2>Spotify</h2><hr /></div>
+    <div class="editor-card">
+      <div class="editor-card-header">
+        <h2>Spotify Now Playing</h2>
+        <span class="code-badge">SPT01TD</span>
+        <span class="tag dynamic">dynamic</span>
+      </div>
+      <div class="editor-body">
+        <div class="controls-panel">
+          <div class="toggle-row" style="margin-bottom:1rem;">
+            <label>Enabled</label>
+            <label class="toggle"><input type="checkbox" id="spt-enabled" checked onchange="renderSPT()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="spt-controls">
+            <div class="toggle-row" style="margin-bottom:1rem;">
+              <label style="font-size:0.78rem;color:var(--text)">Show last played when idle</label>
+              <label class="toggle"><input type="checkbox" id="spt-last" checked onchange="renderSPT()"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="control-row">
+              <label>Theme</label>
+              <div class="theme-picker">
+                <button class="theme-btn active" onclick="setTheme('spt','TD',this)">TD dark</button>
+                <button class="theme-btn" onclick="setTheme('spt','TL',this)">TL light</button>
+                <button class="theme-btn" onclick="setTheme('spt','TT',this)">TT terminal</button>
+                <button class="theme-btn" onclick="setTheme('spt','TI',this)">TI ivory</button>
+              </div>
+            </div>
+            <p style="margin-top:1rem;font-size:0.72rem;color:var(--muted);line-height:1.5;">Requires Spotify OAuth setup separately. Token refresh handled server-side automatically.</p>
+          </div>
+        </div>
+        <div class="preview-panel">
+          <div class="preview-frame" id="spt-preview"></div>
+          <div class="preview-meta">URL: /svg/<span>supernova0866</span>/spotify/<span>SPT01TD</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- APPLY BAR -->
+<div id="apply-bar">
+  <span>preview.html — local dev reference · changes here don't save</span>
+  <button id="apply-btn" onclick="alert('Apply is wired in dashboard.html — this is preview only.')">Apply</button>
+</div>
+
+<script>
+// ── State ──
+const state = {
+  bnr:      { theme: 'TD', variant: 1 },
+  'bnr-hero': { theme: 'TD', variant: 2 },
+  'bnr-wave': { theme: 'TD', variant: 3 },
+  ghs:  { theme: 'TD' },
+  stk:  { theme: 'TD' },
+  tpl:  { theme: 'TD' },
+  prf:  { theme: 'TD' },
+  cwo:  { theme: 'TD' },
+  dvs:  { theme: 'TD', variant: 1, software: ['vscode','replit'], languages: ['python','javascript','typescript'], os: ['windows'] },
+  scl:  { theme: 'TD' },
+  vsc:  { theme: 'TD' },
+  cbt:  { theme: 'TD' },
+  bgs:  { theme: 'TD' },
+  img1: { theme: 'TD' },
+  img2: { theme: 'TD' },
+  dcs:  { theme: 'TD' },
+  spt:  { theme: 'TD' },
+};
+
+// ── Theme colors ──
+const themes = {
+  TD: { bg: '#161b22', surface: '#0d1117', border: '#21262d', text: '#e6edf3', muted: '#7d8590', accent: '#58a6ff', green: '#3fb950', orange: '#f78166' },
+  TL: { bg: '#ffffff', surface: '#f6f8fa', border: '#d0d7de', text: '#1f2328', muted: '#656d76', accent: '#0969da', green: '#1a7f37', orange: '#cf222e' },
+  TT: { bg: '#0a0a0a', surface: '#111111', border: '#00ff4133', text: '#00ff41', muted: '#00aa2a', accent: '#00ff41', green: '#00ff41', orange: '#ff6600' },
+  TI: { bg: '#fdf6e3', surface: '#eee8d5', border: '#d3c9a1', text: '#586e75', muted: '#93a1a1', accent: '#268bd2', green: '#859900', orange: '#dc322f' },
+};
+
+function t(key) { return themes[state[arguments[1] || 'bnr']?.theme || 'TD'][key]; }
+function th(card) { return themes[state[card]?.theme || 'TD']; }
+
+// ── Nav ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  // render the page's SVG
+  const renders = { bnr: renderBNR, 'bnr-hero': renderBNRHero, 'bnr-wave': renderBNRWave, ghs: renderGHS, stk: renderSTK, tpl: renderTPL, prf: renderPRF, cwo: renderCWO, dvs: renderDVS, scl: renderSCL, vsc: renderVSC, cbt: renderCBT, bgs: renderBGS, img: renderIMGPage, dcs: renderDCS, spt: renderSPT };
+  if (renders[id]) renders[id]();
+}
+
+// ── Theme + Variant ──
+function setTheme(card, theme, btn) {
+  state[card].theme = theme;
+  btn.closest('.theme-picker').querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const renders = { bnr: renderBNR, 'bnr-hero': renderBNRHero, 'bnr-wave': renderBNRWave, ghs: renderGHS, stk: renderSTK, tpl: renderTPL, prf: renderPRF, cwo: renderCWO, dvs: renderDVS, scl: renderSCL, vsc: renderVSC, cbt: renderCBT, bgs: renderBGS, img: renderIMGPage, dcs: renderDCS, spt: renderSPT };
+  if (renders[card]) renders[card]();
+}
+
+function setVariant(card, v, btn) {
+  state[card].variant = v;
+  btn.closest('.variant-picker').querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Icon toggle ──
+function toggleIcon(chip) {
+  chip.classList.toggle('selected');
+  renderDVS();
+}
+
+// ── Enabled toggle ──
+function setEnabled(card, controls) {
+  const enabled = document.getElementById(card + '-enabled').checked;
+  const ctrl = document.getElementById(controls || card + '-controls');
+  if (ctrl) ctrl.style.opacity = enabled ? '1' : '0.4';
+  if (ctrl) ctrl.style.pointerEvents = enabled ? '' : 'none';
+}
+
+// ── SVG Builders ──
+
+function svgWrap(w, h, theme, content) {
+  const c = themes[theme];
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" width="100%">
+  <rect width="${w}" height="${h}" fill="${c.bg}" rx="8"/>
+  ${content}
+</svg>`;
+}
+
+// BNR01 — Typing banner (JS-animated in preview)
+function renderBNR() {
+  setEnabled('bnr');
+  const c = th('bnr');
+  const tagline = document.getElementById('bnr-tagline').value;
+  const v = state.bnr.variant;
+  const theme = state.bnr.theme;
+  const code = `BNR0${v}${theme}`;
+  document.getElementById('bnr-code-badge').textContent = code;
+  document.getElementById('bnr-url-code').textContent = code;
+
+  const anchor = v === 1 ? 'middle' : 'start';
+  const tx = v === 1 ? 350 : 24;
+
+  const svg = `<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" width="100%" id="tw-svg">
+  <rect width="700" height="100" fill="${c.bg}" rx="8"/>
+  <text id="tw-txt" x="${tx}" y="46" text-anchor="${anchor}" font-family="monospace" font-size="22" fill="${c.accent}" font-weight="700"></text>
+  <rect id="tw-cur" x="${tx}" y="26" width="2" height="24" fill="${c.accent}" rx="1"/>
+  <text x="${v===1?350:24}" y="74" text-anchor="${anchor}" font-family="monospace" font-size="13" fill="${c.muted}">${tagline}</text>
+</svg>`;
+
+  document.getElementById('bnr-preview').innerHTML = svg;
+  startTypewriter('tw-txt', 'tw-cur', 'supernova0866',
+    parseInt(document.getElementById('bnr-speed').value),
+    parseInt(document.getElementById('bnr-bspeed').value),
+    parseInt(document.getElementById('bnr-pause').value),
+    v === 1, c.accent
+  );
+}
+
+// Typewriter engine
+let twTimer = null;
+function startTypewriter(textId, curId, word, speed, bspeed, pause, centered, color) {
+  if (twTimer) clearTimeout(twTimer);
+  const textEl = document.getElementById(textId);
+  const curEl  = document.getElementById(curId);
+  if (!textEl || !curEl) return;
+  let current = '', typing = true, paused = 0;
+  const CHAR_W = 13.2;
+
+  function updateCursor() {
+    if (centered) {
+      const tw = current.length * CHAR_W;
+      curEl.setAttribute('x', 350 + tw / 2 + 4);
+    } else {
+      curEl.setAttribute('x', 24 + current.length * CHAR_W + 2);
+    }
+  }
+
+  function step() {
+    if (typing) {
+      if (current.length < word.length) {
+        current += word[current.length];
+        textEl.textContent = current;
+        updateCursor();
+        twTimer = setTimeout(step, speed);
+      } else {
+        paused++;
+        twTimer = setTimeout(step, 100);
+        if (paused > pause / 100) { paused = 0; typing = false; }
+      }
+    } else {
+      if (current.length > 0) {
+        current = current.slice(0, -1);
+        textEl.textContent = current;
+        updateCursor();
+        twTimer = setTimeout(step, bspeed);
+      } else {
+        typing = true;
+        twTimer = setTimeout(step, 400);
+      }
+    }
+  }
+
+  // Cursor blink
+  if (curEl._blink) clearInterval(curEl._blink);
+  curEl._blink = setInterval(() => { curEl.style.opacity = curEl.style.opacity === '0' ? '1' : '0'; }, 530);
+
+  step();
+}
+
+// BNR02 — Hero
+function renderBNRHero() {
+  setEnabled('bnr-hero');
+  const c = th('bnr-hero');
+  const tagline = document.getElementById('bnr-hero-tagline').value;
+  const status  = document.getElementById('bnr-hero-status').value;
+  const theme   = state['bnr-hero'].theme;
+  document.getElementById('bnr-hero-code-badge').textContent = `BNR02${theme}`;
+  document.getElementById('bnr-hero-url-code').textContent   = `BNR02${theme}`;
+  document.getElementById('bnr-hero-preview').innerHTML = svgWrap(700, 110, theme,
+    `<rect x="0" y="0" width="4" height="110" fill="${c.accent}" rx="2"/>
+     <text x="28" y="45" font-family="monospace" font-size="26" fill="${c.text}" font-weight="700">supernova0866</text>
+     <text x="28" y="68" font-family="monospace" font-size="13" fill="${c.muted}">${tagline}</text>
+     <text x="28" y="90" font-family="monospace" font-size="11" fill="${c.green}">● ${status}</text>`
+  );
+}
+
+// BNR03 — Wave
+function renderBNRWave() {
+  setEnabled('bnr-wave');
+  const c = th('bnr-wave');
+  const tagline = document.getElementById('bnr-wave-tagline').value;
+  const theme   = state['bnr-wave'].theme;
+  const waveColors = { TD: '#1f2d3d', TL: '#b6d4f5', TT: '#003300', TI: '#b8a060' };
+  const waveColor  = waveColors[theme];
+  document.getElementById('bnr-wave-preview').innerHTML = svgWrap(700, 110, theme,
+    `<path d="M0,60 C100,30 200,90 350,55 C500,20 600,70 700,50 L700,110 L0,110 Z" fill="${waveColor}"/>
+     <text x="350" y="48" text-anchor="middle" font-family="monospace" font-size="22" fill="${c.text}" font-weight="700">supernova0866</text>
+     <text x="350" y="72" text-anchor="middle" font-family="monospace" font-size="12" fill="${c.accent}">${tagline}</text>`
+  );
+}
+
+// GHS
+function renderGHS() {
+  setEnabled('ghs');
+  const c = th('ghs');
+  const theme = state.ghs.theme;
+  document.getElementById('ghs-preview').innerHTML = svgWrap(300, 130, theme,
+    `<text x="14" y="24" font-family="monospace" font-size="11" fill="${c.muted}">GitHub Stats · supernova0866</text>
+     <line x1="14" y1="32" x2="286" y2="32" stroke="${c.border}" stroke-width="1"/>
+     <text x="14" y="52" font-family="monospace" font-size="11" fill="${c.muted}">Total commits</text><text x="286" y="52" text-anchor="end" font-family="monospace" font-size="11" fill="${c.text}">1,204</text>
+     <text x="14" y="70" font-family="monospace" font-size="11" fill="${c.muted}">Pull requests</text><text x="286" y="70" text-anchor="end" font-family="monospace" font-size="11" fill="${c.text}">87</text>
+     <text x="14" y="88" font-family="monospace" font-size="11" fill="${c.muted}">Issues opened</text><text x="286" y="88" text-anchor="end" font-family="monospace" font-size="11" fill="${c.text}">43</text>
+     <text x="14" y="106" font-family="monospace" font-size="11" fill="${c.muted}">Stars earned</text><text x="286" y="106" text-anchor="end" font-family="monospace" font-size="11" fill="${c.text}">312</text>
+     <text x="14" y="122" font-family="monospace" font-size="9" fill="${c.accent}">↻ live via GitHub API</text>`
+  );
+}
+
+// STK
+function renderSTK() {
+  setEnabled('stk');
+  const c = th('stk');
+  const theme = state.stk.theme;
+  document.getElementById('stk-preview').innerHTML = svgWrap(300, 130, theme,
+    `<text x="150" y="22" text-anchor="middle" font-family="monospace" font-size="10" fill="${c.muted}">Contribution Streak</text>
+     <text x="150" y="62" text-anchor="middle" font-family="monospace" font-size="36" fill="${c.orange}" font-weight="700">🔥 14</text>
+     <text x="150" y="80" text-anchor="middle" font-family="monospace" font-size="10" fill="${c.muted}">current streak (days)</text>
+     <line x1="14" y1="92" x2="286" y2="92" stroke="${c.border}" stroke-width="1"/>
+     <text x="75" y="110" text-anchor="middle" font-family="monospace" font-size="10" fill="${c.muted}">longest</text>
+     <text x="75" y="124" text-anchor="middle" font-family="monospace" font-size="12" fill="${c.text}">31 days</text>
+     <text x="225" y="110" text-anchor="middle" font-family="monospace" font-size="10" fill="${c.muted}">total</text>
+     <text x="225" y="124" text-anchor="middle" font-family="monospace" font-size="12" fill="${c.text}">842</text>`
+  );
+}
+
+// TPL
+function renderTPL() {
+  setEnabled('tpl');
+  const c = th('tpl');
+  const theme = state.tpl.theme;
+  const langs = [
+    { name: 'TypeScript', pct: 80, w: 136, color: '#3178c6' },
+    { name: 'Python',     pct: 50, w: 85,  color: '#3572A5' },
+    { name: 'Rust',       pct: 30, w: 51,  color: '#dea584' },
+    { name: 'Go',         pct: 20, w: 34,  color: '#00ADD8' },
+  ];
+  let rows = '';
+  langs.forEach((l, i) => {
+    const y = 34 + i * 20;
+    rows += `<text x="14" y="${y+10}" font-family="monospace" font-size="10" fill="${c.text}">${l.name}</text>
+             <rect x="100" y="${y}" width="170" height="10" rx="3" fill="${c.border}"/>
+             <rect x="100" y="${y}" width="${l.w}" height="10" rx="3" fill="${l.color}"/>
+             <text x="278" y="${y+10}" text-anchor="end" font-family="monospace" font-size="9" fill="${c.muted}">${l.pct}%</text>`;
+  });
+  document.getElementById('tpl-preview').innerHTML = svgWrap(300, 130, theme,
+    `<text x="14" y="22" font-family="monospace" font-size="11" fill="${c.muted}">Top Languages</text>${rows}
+     <text x="14" y="122" font-family="monospace" font-size="9" fill="${c.accent}">↻ live via GitHub API</text>`
+  );
+}
+
+// PRF
+function renderPRF() {
+  setEnabled('prf');
+  const c = th('prf');
+  const theme    = state.prf.theme;
+  const loc      = document.getElementById('prf-location').value;
+  const bio      = document.getElementById('prf-bio').value;
+  const github   = document.getElementById('prf-github').value;
+  const discord  = document.getElementById('prf-discord').value;
+  document.getElementById('prf-preview').innerHTML = svgWrap(300, 150, theme,
+    `<circle cx="44" cy="54" r="28" fill="${c.border}"/>
+     <text x="44" y="60" text-anchor="middle" font-family="monospace" font-size="16" fill="${c.accent}">SN</text>
+     <text x="84" y="38" font-family="monospace" font-size="13" fill="${c.text}" font-weight="700">supernova0866</text>
+     <text x="84" y="54" font-family="monospace" font-size="10" fill="${c.muted}">Full-stack Developer</text>
+     <text x="84" y="70" font-family="monospace" font-size="10" fill="${c.muted}">📍 ${loc}</text>
+     <line x1="14" y1="90" x2="286" y2="90" stroke="${c.border}" stroke-width="1"/>
+     <text x="14" y="108" font-family="monospace" font-size="10" fill="${c.muted}">${bio.substring(0,38)}</text>
+     <text x="14" y="124" font-family="monospace" font-size="9" fill="${c.accent}">github.com/${github}</text>
+     <text x="14" y="138" font-family="monospace" font-size="9" fill="#5865F2">discord: ${discord}</text>`
+  );
+}
+
+// CWO
+function renderCWO() {
+  setEnabled('cwo');
+  const c     = th('cwo');
+  const theme = state.cwo.theme;
+  const proj  = document.getElementById('cwo-project').value;
+  const desc  = document.getElementById('cwo-desc').value;
+  document.getElementById('cwo-preview').innerHTML = svgWrap(300, 100, theme,
+    `<circle cx="22" cy="22" r="5" fill="${c.green}">
+       <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+     </circle>
+     <text x="34" y="26" font-family="monospace" font-size="10" fill="${c.muted}">currently working on</text>
+     <text x="14" y="52" font-family="monospace" font-size="13" fill="${c.text}" font-weight="700">${proj.substring(0,30)}</text>
+     <text x="14" y="70" font-family="monospace" font-size="9" fill="${c.muted}">${desc.substring(0,42)}</text>
+     <text x="14" y="85" font-family="monospace" font-size="9" fill="${c.muted}">${desc.substring(42,84)}</text>`
+  );
+}
+
+// DVS — three variants: Icons, Badges, Grid
+function getIcons() {
+  const sw = [...document.querySelectorAll('#dvs-software .icon-chip.selected')].map(el => ({ sym: el.querySelector('.icon-sym').textContent, color: el.querySelector('.icon-sym').style.color, label: el.querySelector('.icon-label').textContent }));
+  const lg = [...document.querySelectorAll('#dvs-languages .icon-chip.selected')].map(el => ({ sym: el.querySelector('.icon-sym').textContent, color: el.querySelector('.icon-sym').style.color, label: el.querySelector('.icon-label').textContent }));
+  const os = [...document.querySelectorAll('#dvs-os .icon-chip.selected')].map(el => ({ sym: el.querySelector('.icon-sym').textContent, color: el.querySelector('.icon-sym').style.color, label: el.querySelector('.icon-label').textContent }));
+  return { sw, lg, os, all: [...sw, ...lg, ...os] };
+}
+
+function renderDVS() {
+  setEnabled('dvs');
+  const c     = th('dvs');
+  const theme = state.dvs.theme;
+  const v     = state.dvs.variant;
+  const code  = `DVS0${v}${theme}`;
+  document.getElementById('dvs-code-badge').textContent = code;
+  document.getElementById('dvs-url-code').textContent   = code;
+
+  const { sw, lg, os, all } = getIcons();
+
+  if (v === 1) {
+    // Icons — sectioned card with big icon tiles
+    function iconRow(items, startX, startY) {
+      return items.slice(0, 10).map((item, i) => {
+        const x = startX + i * 46;
+        return `<rect x="${x}" y="${startY}" width="40" height="38" rx="5" fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
+                <text x="${x+20}" y="${startY+22}" text-anchor="middle" font-family="monospace" font-size="13" fill="${item.color||c.text}">${item.sym}</text>
+                <text x="${x+20}" y="${startY+34}" text-anchor="middle" font-family="monospace" font-size="7" fill="${c.muted}">${item.label.substring(0,7)}</text>`;
+      }).join('');
+    }
+    document.getElementById('dvs-preview').innerHTML = svgWrap(660, 200, theme,
+      `<text x="14" y="18" font-family="monospace" font-size="9" fill="${c.muted}" letter-spacing="1">SOFTWARE</text>
+       <line x1="14" y1="22" x2="646" y2="22" stroke="${c.border}" stroke-width="1"/>
+       ${iconRow(sw, 14, 28)}
+       <text x="14" y="82" font-family="monospace" font-size="9" fill="${c.muted}" letter-spacing="1">LANGUAGES</text>
+       <line x1="14" y1="86" x2="646" y2="86" stroke="${c.border}" stroke-width="1"/>
+       ${iconRow(lg, 14, 92)}
+       <text x="14" y="146" font-family="monospace" font-size="9" fill="${c.muted}" letter-spacing="1">OS</text>
+       <line x1="14" y1="150" x2="646" y2="150" stroke="${c.border}" stroke-width="1"/>
+       ${iconRow(os, 14, 156)}`
+    );
+  } else if (v === 2) {
+    // Badges — flat inline row of all selected icons
+    let chips = '', x = 10;
+    all.forEach(s => {
+      const w = Math.max(s.label.length * 7.2 + 18, 40);
+      chips += `<rect x="${x}" y="9" width="${w}" height="24" rx="4" fill="${c.surface}" stroke="${s.color}55" stroke-width="1"/>
+                <text x="${x+w/2}" y="25" text-anchor="middle" font-family="monospace" font-size="10" fill="${s.color}">${s.label}</text>`;
+      x += w + 6;
+    });
+    const totalW = Math.min(Math.max(x + 10, 200), 660);
+    document.getElementById('dvs-preview').innerHTML = svgWrap(totalW, 42, theme,
+      chips || `<text x="14" y="24" font-family="monospace" font-size="10" fill="${c.muted}">select some icons above</text>`
+    );
+  } else {
+    // Grid — compact sectioned grid, 3 categories
+    const cats = [['SOFTWARE', sw], ['LANGUAGES', lg], ['OS', os]].filter(([, items]) => items.length);
+    let content = '', y = 16;
+    cats.forEach(([cat, items]) => {
+      content += `<text x="14" y="${y}" font-family="monospace" font-size="8" fill="${c.muted}" letter-spacing="1">${cat}</text>`;
+      y += 5;
+      items.forEach((s, i) => {
+        const x = 14 + i * 58;
+        content += `<rect x="${x}" y="${y}" width="52" height="20" rx="3" fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
+                    <text x="${x+26}" y="${y+13}" text-anchor="middle" font-family="monospace" font-size="9" fill="${s.color}">${s.label.substring(0,8)}</text>`;
+      });
+      y += 28;
+    });
+    document.getElementById('dvs-preview').innerHTML = svgWrap(380, Math.max(y + 10, 60), theme,
+      content || `<text x="14" y="24" font-family="monospace" font-size="10" fill="${c.muted}">select some icons above</text>`
+    );
+  }
+}
+
+
+// SCL
+function renderSCL() {
+  setEnabled('scl');
+  const c     = th('scl');
+  const theme = state.scl.theme;
+  const links = [
+    { label: 'GitHub',   color: c.text,    val: document.getElementById('scl-github').value },
+    { label: 'Discord',  color: '#5865F2', val: document.getElementById('scl-discord').value },
+    { label: 'Twitter',  color: '#1DA1F2', val: document.getElementById('scl-twitter').value },
+    { label: 'LinkedIn', color: '#0A66C2', val: document.getElementById('scl-linkedin').value },
+  ].filter(l => l.val);
+  let chips = '', x = 0;
+  links.forEach(l => {
+    const w = l.label.length * 8 + 24;
+    chips += `<rect x="${x}" y="8" width="${w}" height="28" rx="14" fill="${c.surface}" stroke="${l.color}88" stroke-width="1"/>
+              <text x="${x+w/2}" y="26" text-anchor="middle" font-family="monospace" font-size="10" fill="${l.color}">${l.label}</text>`;
+    x += w + 8;
+  });
+  document.getElementById('scl-preview').innerHTML = svgWrap(Math.max(x + 4, 200), 44, theme,
+    chips || `<text x="14" y="26" font-family="monospace" font-size="10" fill="${c.muted}">no links set</text>`
+  );
+}
+
+// CBT
+let cbtId = 0;
+
+function addCBT() {
+  const id = ++cbtId;
+  const list = document.getElementById('cbt-list');
+  const row = document.createElement('div');
+  row.id = `cbt-row-${id}`;
+  row.style.cssText = 'display:flex;gap:0.4rem;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="Label" oninput="renderCBT()"
+      style="flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;font-size:0.75rem;padding:0.3rem 0.5rem;outline:none;" />
+    <input type="color" value="#58a6ff" oninput="renderCBT()"
+      title="Button color"
+      style="width:28px;height:28px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;" />
+    <input type="text" placeholder="https://..." oninput="renderCBT()"
+      style="flex:1.5;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:monospace;font-size:0.72rem;padding:0.3rem 0.5rem;outline:none;" />
+    <button onclick="removeCBT(${id})"
+      style="font-size:0.75rem;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;flex-shrink:0;">✕</button>`;
+  list.appendChild(row);
+  renderCBT();
+}
+
+function removeCBT(id) {
+  document.getElementById(`cbt-row-${id}`)?.remove();
+  renderCBT();
+}
+
+function getCBTs() {
+  return [...document.querySelectorAll('#cbt-list > div')].map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { label: inputs[0].value.trim(), color: inputs[1].value, url: inputs[2].value.trim() };
+  }).filter(b => b.label);
+}
+
+function renderCBT() {
+  setEnabled('cbt');
+  const c     = th('cbt');
+  const theme = state.cbt.theme;
+  const btns  = getCBTs();
+  let chips = '', x = 0;
+  btns.forEach(b => {
+    const w = b.label.length * 8 + 24;
+    chips += `<rect x="${x}" y="8" width="${w}" height="28" rx="6" fill="${b.color}22" stroke="${b.color}" stroke-width="1"/>
+              <text x="${x+w/2}" y="26" text-anchor="middle" font-family="monospace" font-size="10" fill="${b.color}" font-weight="600">${b.label}</text>`;
+    x += w + 8;
+  });
+  document.getElementById('cbt-preview').innerHTML = svgWrap(Math.max(x + 4, 200), 44, theme,
+    chips || `<text x="14" y="26" font-family="monospace" font-size="10" fill="${c.muted}">add a button above to preview</text>`
+  );
+}
+
+// VSC
+function renderVSC() {
+  setEnabled('vsc');
+  const c     = th('vsc');
+  const theme = state.vsc.theme;
+  document.getElementById('vsc-preview').innerHTML = svgWrap(260, 44, theme,
+    `<rect x="0" y="8" width="260" height="28" rx="4" fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
+     <text x="130" y="26" text-anchor="middle" font-family="monospace" font-size="11" fill="${c.muted}">👁 profile views: <tspan fill="${c.text}">1,337</tspan></text>`
+  );
+}
+
+// DCS
+function renderDCS() {
+  setEnabled('dcs');
+  const c     = th('dcs');
+  const theme = state.dcs.theme;
+  document.getElementById('dcs-preview').innerHTML = svgWrap(300, 140, theme,
+    `<rect x="0" y="0" width="300" height="3" rx="2" fill="#5865F2"/>
+     <rect x="14" y="14" width="24" height="24" rx="6" fill="#5865F2"/>
+     <text x="26" y="30" text-anchor="middle" font-family="monospace" font-size="12" fill="white" font-weight="700">D</text>
+     <text x="46" y="24" font-family="monospace" font-size="12" fill="${c.text}" font-weight="700">supernova0866</text>
+     <text x="46" y="38" font-family="monospace" font-size="9" fill="${c.muted}">#0866</text>
+     <circle cx="24" cy="46" r="5" fill="${c.green}" stroke="${c.bg}" stroke-width="2"/>
+     <text x="36" y="50" font-family="monospace" font-size="9" fill="${c.green}">online</text>
+     <line x1="14" y1="60" x2="286" y2="60" stroke="${c.border}" stroke-width="1"/>
+     <text x="14" y="76" font-family="monospace" font-size="9" fill="${c.muted}">PLAYING A GAME</text>
+     <rect x="14" y="82" width="34" height="34" rx="4" fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
+     <text x="31" y="103" text-anchor="middle" font-family="monospace" font-size="10" fill="#569cd6">{ }</text>
+     <text x="56" y="94" font-family="monospace" font-size="10" fill="${c.text}" font-weight="700">Visual Studio Code</text>
+     <text x="56" y="108" font-family="monospace" font-size="9" fill="${c.muted}">Editing preview.html</text>
+     <text x="56" y="120" font-family="monospace" font-size="9" fill="${c.muted}">2 hrs 14 mins elapsed</text>
+     <text x="14" y="134" font-family="monospace" font-size="8" fill="${c.accent}">↻ live via Lanyard API</text>`
+  );
+}
+
+// SPT
+function renderSPT() {
+  setEnabled('spt');
+  const c     = th('spt');
+  const theme = state.spt.theme;
+  document.getElementById('spt-preview').innerHTML = svgWrap(300, 130, theme,
+    `<rect x="0" y="0" width="300" height="3" rx="2" fill="#1DB954"/>
+     <rect x="14" y="14" width="52" height="52" rx="6" fill="${c.surface}" stroke="#1DB95444" stroke-width="1"/>
+     <text x="40" y="45" text-anchor="middle" font-family="monospace" font-size="22" fill="#1DB954">♪</text>
+     <text x="76" y="26" font-family="monospace" font-size="9" fill="#1DB954">NOW PLAYING</text>
+     <text x="76" y="42" font-family="monospace" font-size="13" fill="${c.text}" font-weight="700">Blinding Lights</text>
+     <text x="76" y="56" font-family="monospace" font-size="10" fill="${c.muted}">The Weeknd</text>
+     <text x="76" y="70" font-family="monospace" font-size="9" fill="${c.muted}">After Hours</text>
+     <rect x="14" y="80" width="272" height="4" rx="2" fill="${c.border}"/>
+     <rect x="14" y="80" width="130" height="4" rx="2" fill="#1DB954"/>
+     <circle cx="144" cy="82" r="5" fill="#1DB954"/>
+     <text x="14" y="96" font-family="monospace" font-size="8" fill="${c.muted}">2:07</text>
+     <text x="286" y="96" text-anchor="end" font-family="monospace" font-size="8" fill="${c.muted}">4:22</text>
+     <rect x="14" y="104" width="3" height="12" rx="1" fill="#1DB954">
+       <animate attributeName="height" values="4;12;6;10;4" dur="1.2s" repeatCount="indefinite"/>
+       <animate attributeName="y" values="112;104;110;106;112" dur="1.2s" repeatCount="indefinite"/>
+     </rect>
+     <rect x="19" y="104" width="3" height="12" rx="1" fill="#1DB954">
+       <animate attributeName="height" values="12;4;10;6;12" dur="0.9s" repeatCount="indefinite"/>
+       <animate attributeName="y" values="104;112;106;110;104" dur="0.9s" repeatCount="indefinite"/>
+     </rect>
+     <rect x="24" y="104" width="3" height="12" rx="1" fill="#1DB954">
+       <animate attributeName="height" values="8;12;4;12;8" dur="1.1s" repeatCount="indefinite"/>
+       <animate attributeName="y" values="108;104;112;104;108" dur="1.1s" repeatCount="indefinite"/>
+     </rect>
+     <text x="34" y="115" font-family="monospace" font-size="8" fill="${c.muted}">listening now</text>
+     <text x="286" y="115" text-anchor="end" font-family="monospace" font-size="8" fill="${c.accent}">↻ live via Spotify API</text>`
+  );
+}
+
+// BGS
+let bgsId = 0;
+
+function addBGS() {
+  const id = ++bgsId;
+  const list = document.getElementById('bgs-list');
+  const row = document.createElement('div');
+  row.id = `bgs-row-${id}`;
+  row.style.cssText = 'display:flex;gap:0.4rem;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="build" oninput="renderBGS()"
+      style="flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:monospace;font-size:0.75rem;padding:0.3rem 0.5rem;outline:none;" />
+    <input type="text" placeholder="passing" oninput="renderBGS()"
+      style="flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;font-size:0.75rem;padding:0.3rem 0.5rem;outline:none;" />
+    <input type="color" value="#3fb950" oninput="renderBGS()"
+      title="Right side color"
+      style="width:28px;height:28px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;" />
+    <button onclick="removeBGS(${id})"
+      style="font-size:0.75rem;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;flex-shrink:0;">✕</button>`;
+  list.appendChild(row);
+  renderBGS();
+}
+
+function removeBGS(id) {
+  document.getElementById(`bgs-row-${id}`)?.remove();
+  renderBGS();
+}
+
+function getBGSItems() {
+  return [...document.querySelectorAll('#bgs-list > div')].map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { left: inputs[0].value.trim(), right: inputs[1].value.trim(), color: inputs[2].value };
+  }).filter(b => b.left || b.right);
+}
+
+function renderBGS() {
+  setEnabled('bgs');
+  const c     = th('bgs');
+  const theme = state.bgs.theme;
+  const items = getBGSItems();
+  const LPAD = 6, RPAD = 6, H = 20, GAP = 6;
+  const CHAR_W = 6.5;
+  let badges = '', x = 0;
+  items.forEach(b => {
+    const lw = Math.max(b.left.length * CHAR_W + LPAD * 2, 28);
+    const rw = Math.max(b.right.length * CHAR_W + RPAD * 2, 28);
+    const bw = lw + rw;
+    // Left side (dark)
+    badges += `<rect x="${x}" y="0" width="${lw}" height="${H}" rx="3" fill="${c.border}"/>`;
+    badges += `<text x="${x + lw/2}" y="${H*0.68}" text-anchor="middle" font-family="monospace" font-size="9" fill="${c.muted}">${b.left}</text>`;
+    // Right side (colored)
+    badges += `<rect x="${x+lw}" y="0" width="${rw}" height="${H}" rx="3" fill="${b.color}"/>`;
+    badges += `<text x="${x+lw+rw/2}" y="${H*0.68}" text-anchor="middle" font-family="monospace" font-size="9" fill="#fff" font-weight="700">${b.right}</text>`;
+    // Clip sharp left edge of right rect
+    badges += `<rect x="${x+lw-2}" y="0" width="4" height="${H}" fill="${b.color}"/>`;
+    // Clip sharp right edge of left rect
+    badges += `<rect x="${x+lw-2}" y="0" width="2" height="${H}" fill="${c.border}"/>`;
+    x += bw + GAP;
+  });
+  const totalW = Math.max(x, 200);
+  const totalH = H + 8;
+  document.getElementById('bgs-preview').innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" width="100%">
+    <rect width="${totalW}" height="${totalH}" fill="${themes[theme].bg}" rx="6"/>
+    <g transform="translate(4,4)">${badges || `<text x="0" y="14" font-family="monospace" font-size="10" fill="${c.muted}">add a badge above to preview</text>`}</g>
+  </svg>`;
+}
+
+// IMG
+let img2Id = 0;
+
+function addIMG2() {
+  const id = ++img2Id;
+  const list = document.getElementById('img2-list');
+  const row = document.createElement('div');
+  row.id = `img2-row-${id}`;
+  row.style.cssText = 'display:flex;gap:0.4rem;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="https://i.imgur.com/example.png" oninput="renderIMG2()"
+      style="flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;font-size:0.72rem;padding:0.3rem 0.5rem;outline:none;" />
+    <button onclick="removeIMG2(${id})"
+      style="font-size:0.75rem;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;flex-shrink:0;">✕</button>`;
+  list.appendChild(row);
+  renderIMG2();
+}
+
+function removeIMG2(id) {
+  document.getElementById(`img2-row-${id}`)?.remove();
+  renderIMG2();
+}
+
+function getIMG2URLs() {
+  return [...document.querySelectorAll('#img2-list > div input')].map(i => i.value.trim()).filter(Boolean);
+}
+
+function renderIMGPage() { renderIMG1(); renderIMG2(); }
+
+function renderIMG1() {
+  setEnabled('img1');
+  const c     = th('img1');
+  const theme = state.img1.theme;
+  const url   = document.getElementById('img1-url').value.trim();
+  const w     = parseInt(document.getElementById('img1-w').value) || 600;
+  const h     = parseInt(document.getElementById('img1-h').value) || 200;
+  const r     = parseInt(document.getElementById('img1-r').value) || 8;
+  document.getElementById('img1-preview').innerHTML = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" width="100%">
+    <rect width="${w}" height="${h}" fill="${themes[theme].bg}" rx="${r}"/>
+    ${url
+      ? `<clipPath id="img1-clip"><rect width="${w}" height="${h}" rx="${r}"/></clipPath>
+         <image href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#img1-clip)"/>`
+      : `<rect x="1" y="1" width="${w-2}" height="${h-2}" rx="${r}" fill="none" stroke="${themes[theme].border}" stroke-width="1" stroke-dasharray="6,4"/>
+         <text x="${w/2}" y="${h/2-6}" text-anchor="middle" font-family="monospace" font-size="11" fill="${themes[theme].muted}">paste an image URL</text>
+         <text x="${w/2}" y="${h/2+10}" text-anchor="middle" font-family="monospace" font-size="9" fill="${themes[theme].muted}">Discord CDN · Imgur · any direct link</text>`
+    }
+  </svg>`;
+}
+
+function renderIMG2() {
+  setEnabled('img2');
+  const c     = th('img2');
+  const theme = state.img2.theme;
+  const cols  = Math.max(1, parseInt(document.getElementById('img2-cols').value) || 3);
+  const cw    = parseInt(document.getElementById('img2-cw').value) || 180;
+  const ch    = parseInt(document.getElementById('img2-ch').value) || 120;
+  const gap   = parseInt(document.getElementById('img2-gap').value) || 8;
+  const urls  = getIMG2URLs();
+  const rows  = Math.max(1, Math.ceil(urls.length / cols));
+  const totalW = cols * cw + (cols - 1) * gap;
+  const totalH = rows * ch + (rows - 1) * gap;
+  let cells = '';
+  if (urls.length === 0) {
+    // placeholder grid
+    for (let r = 0; r < 2; r++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * (cw + gap), y = r * (ch + gap);
+        cells += `<rect x="${x}" y="${y}" width="${cw}" height="${ch}" rx="6" fill="none" stroke="${themes[theme].border}" stroke-width="1" stroke-dasharray="6,4"/>
+                  <text x="${x+cw/2}" y="${y+ch/2+4}" text-anchor="middle" font-family="monospace" font-size="9" fill="${themes[theme].muted}">image ${r*cols+col+1}</text>`;
+      }
+    }
+    const ph = 2 * ch + gap;
+    document.getElementById('img2-preview').innerHTML = `<svg viewBox="0 0 ${totalW} ${ph}" xmlns="http://www.w3.org/2000/svg" width="100%">
+      <rect width="${totalW}" height="${ph}" fill="${themes[theme].bg}" rx="8"/>${cells}</svg>`;
+    return;
+  }
+  urls.forEach((url, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = col * (cw + gap), y = row * (ch + gap);
+    cells += `<clipPath id="img2c${i}"><rect x="${x}" y="${y}" width="${cw}" height="${ch}" rx="6"/></clipPath>
+              <image href="${url}" x="${x}" y="${y}" width="${cw}" height="${ch}" preserveAspectRatio="xMidYMid slice" clip-path="url(#img2c${i})"/>`;
+  });
+  document.getElementById('img2-preview').innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" width="100%">
+    <rect width="${totalW}" height="${totalH}" fill="${themes[theme].bg}" rx="8"/>${cells}</svg>`;
+}
+
+// ── Init ──
+renderBNR();
+</script>
+</body>
+</html>
