@@ -1,0 +1,40 @@
+<svg viewBox="0 0 300 174" xmlns="http://www.w3.org/2000/svg" width="300" height="174">
+  <rect width="300" height="174" fill="#ffffff" rx="8" stroke="#d0d7de" stroke-width="1"/>
+
+  <!-- header -->
+  <text x="18" y="18" font-family="monospace" font-size="10" fill="#656d76">Top Languages</text>
+  <line x1="18" y1="22" x2="282" y2="22" stroke="#d0d7de" stroke-width="1"/>
+
+  <!-- bar rows -->
+  
+  <text x="18" y="26" font-family="monospace" font-size="10" fill="#1f2328">{{lang_1}}</text>
+  <rect x="110" y="16" width="160" height="10" rx="3" fill="#d0d7de"/>
+  <rect x="110" y="16" width="80" height="10" rx="3" fill="#0969da"/>
+  <text x="276" y="26" font-family="monospace" font-size="9" fill="#656d76">{{pct_1}}</text>
+  <text x="18" y="46" font-family="monospace" font-size="10" fill="#1f2328">{{lang_2}}</text>
+  <rect x="110" y="36" width="160" height="10" rx="3" fill="#d0d7de"/>
+  <rect x="110" y="36" width="80" height="10" rx="3" fill="#0969da"/>
+  <text x="276" y="46" font-family="monospace" font-size="9" fill="#656d76">{{pct_2}}</text>
+  <text x="18" y="66" font-family="monospace" font-size="10" fill="#1f2328">{{lang_3}}</text>
+  <rect x="110" y="56" width="160" height="10" rx="3" fill="#d0d7de"/>
+  <rect x="110" y="56" width="80" height="10" rx="3" fill="#0969da"/>
+  <text x="276" y="66" font-family="monospace" font-size="9" fill="#656d76">{{pct_3}}</text>
+  <text x="18" y="86" font-family="monospace" font-size="10" fill="#1f2328">{{lang_4}}</text>
+  <rect x="110" y="76" width="160" height="10" rx="3" fill="#d0d7de"/>
+  <rect x="110" y="76" width="80" height="10" rx="3" fill="#0969da"/>
+  <text x="276" y="86" font-family="monospace" font-size="9" fill="#656d76">{{pct_4}}</text>
+  <text x="18" y="106" font-family="monospace" font-size="10" fill="#1f2328">{{lang_5}}</text>
+  <rect x="110" y="96" width="160" height="10" rx="3" fill="#d0d7de"/>
+  <rect x="110" y="96" width="80" height="10" rx="3" fill="#0969da"/>
+  <text x="276" y="106" font-family="monospace" font-size="9" fill="#656d76">{{pct_5}}</text>
+  <text x="18" y="126" font-family="monospace" font-size="10" fill="#1f2328">{{lang_6}}</text>
+  <rect x="110" y="116" width="160" height="10" rx="3" fill="#d0d7de"/>
+  <rect x="110" y="116" width="80" height="10" rx="3" fill="#0969da"/>
+  <text x="276" y="126" font-family="monospace" font-size="9" fill="#656d76">{{pct_6}}</text>
+
+  <!-- live indicator -->
+  <circle cx="22" cy="166" r="3" fill="#1a7f37">
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="30" y="170" font-family="monospace" font-size="8" fill="#0969da">↻ live via GitHub API</text>
+</svg>
