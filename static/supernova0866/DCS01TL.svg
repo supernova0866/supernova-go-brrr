@@ -1,0 +1,47 @@
+<svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg" width="300" height="140">
+  <rect width="300" height="140" fill="#ffffff" rx="8" stroke="#d0d7de" stroke-width="1"/>
+
+  <!-- Discord accent bar -->
+  <rect x="0" y="0" width="300" height="3" rx="2" fill="#5865F2"/>
+
+  <!-- Discord logo mark -->
+  <rect x="14" y="12" width="24" height="24" rx="6" fill="#5865F2"/>
+  <text x="26" y="28" text-anchor="middle" font-family="monospace" font-size="12"
+    fill="white" font-weight="700">D</text>
+
+  <!-- username -->
+  <text x="46" y="22" font-family="monospace" font-size="12"
+    fill="#1f2328" font-weight="700">supernova0866</text>
+
+  <!-- status dot + label -->
+  <circle cx="46" cy="34" r="5" fill="#1a7f37" stroke="#ffffff" stroke-width="2"/>
+  <text x="57" y="38" font-family="monospace" font-size="9" fill="#1a7f37">{{status}}</text>
+
+  <!-- divider -->
+  <line x1="14" y1="48" x2="286" y2="48" stroke="#d0d7de" stroke-width="1"/>
+
+  <!-- activity type label -->
+  <text x="14" y="64" font-family="monospace" font-size="9"
+    fill="#656d76" letter-spacing="0.5">{{activity_type}}</text>
+
+  <!-- activity icon placeholder box -->
+  <rect x="14" y="70" width="34" height="34" rx="4"
+    fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+  <text x="31" y="91" text-anchor="middle" font-family="monospace" font-size="10"
+    fill="#0969da">{ }</text>
+
+  <!-- activity name + detail + elapsed -->
+  <text x="56" y="82" font-family="monospace" font-size="10"
+    fill="#1f2328" font-weight="700">{{activity_name}}</text>
+  <text x="56" y="96" font-family="monospace" font-size="9"
+    fill="#656d76">{{activity_detail}}</text>
+  <text x="56" y="108" font-family="monospace" font-size="9"
+    fill="#656d76">{{elapsed}}</text>
+
+  <!-- live indicator -->
+  <circle cx="18" cy="132" r="3" fill="#1a7f37">
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="26" y="136" font-family="monospace" font-size="8"
+    fill="#0969da">↻ live via Lanyard API</text>
+</svg>
