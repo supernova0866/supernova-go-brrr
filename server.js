@@ -35,6 +35,12 @@ const PROFILES_DIR = path.join(ROOT, 'profiles');
 const STATIC_DIR  = path.join(ROOT, 'static');
 const GEN_DIR     = path.join(ROOT, 'generators');
 
+// ── Valid theme codes ──────────────────────────
+const VALID_THEMES = new Set(['TD', 'TL', 'TT', 'TI']);
+function normalizeTheme(theme) {
+  return VALID_THEMES.has(theme) ? theme : 'TD';
+}
+
 // ── Dynamic card codes ────────────────────────
 // These cards have {{variable}} placeholders — data is injected at serve time
 const DYNAMIC_CODES = new Set([
@@ -443,14 +449,15 @@ function parseSVGRoute(url) {
 // Query-string driven card codes — never stored on disk
 const QUERY_DRIVEN = new Set(['CBT01', 'IMG01', 'IMG02']);
 
-// ── Apply — regenerate all SVGs ───────────────
+// ── Apply — regenerate all SVGs for the user's single global theme ──
 async function applyProfile(username, profile) {
   const generators = require('./generators');
   const userDir    = path.join(STATIC_DIR, username);
   fs.mkdirSync(userDir, { recursive: true });
 
-  // Themes the user has enabled — fall back to just TD
-  const themes  = profile.themes || ['TD'];
+  // Single global theme — every card is generated in this one theme only.
+  // (Legacy profiles may still have a `themes` array; if so, use its first entry.)
+  const theme   = normalizeTheme(profile.theme || profile.themes?.[0] || 'TD');
   const results = [];
 
   for (const [code, generate] of Object.entries(generators)) {
@@ -459,15 +466,13 @@ async function applyProfile(username, profile) {
     // Skip query-driven cards — not stored on disk
     if (QUERY_DRIVEN.has(code)) continue;
 
-    for (const theme of themes) {
-      try {
-        const svg  = generate(profile, { code, theme, isDynamic: DYNAMIC_CODES.has(code) });
-        const file = path.join(userDir, `${code}${theme}.svg`);
-        fs.writeFileSync(file, svg, 'utf8');
-        results.push({ code: `${code}${theme}`, ok: true });
-      } catch (err) {
-        results.push({ code: `${code}${theme}`, ok: false, error: err.message });
-      }
+    try {
+      const svg  = generate(profile, { code, theme, isDynamic: DYNAMIC_CODES.has(code) });
+      const file = path.join(userDir, `${code}${theme}.svg`);
+      fs.writeFileSync(file, svg, 'utf8');
+      results.push({ code: `${code}${theme}`, ok: true });
+    } catch (err) {
+      results.push({ code: `${code}${theme}`, ok: false, error: err.message });
     }
   }
   return results;
@@ -674,6 +679,8 @@ async function router(req, res) {
 
       // Safety: don't allow username or spotify tokens to be overwritten via API
       updated.username        = session.username;
+      updated.theme           = normalizeTheme(updated.theme);
+      delete updated.themes; // legacy multi-theme field — no longer used
       updated.spotify         = { ...profile.spotify, ...updated.spotify };
       updated.visitor_counter = profile.visitor_counter; // preserve count
 
