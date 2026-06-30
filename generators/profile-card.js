@@ -33,7 +33,7 @@ function wrapText(str, charLimit = 42) {
     }
   }
   if (line) lines.push(line.trim());
-  return lines.slice(0, 2); // max 2 lines for bio
+  return lines.slice(0, 2);
 }
 
 module.exports = function generatePRF01(profile, { theme = 'TD', isDynamic = true } = {}) {
@@ -42,86 +42,76 @@ module.exports = function generatePRF01(profile, { theme = 'TD', isDynamic = tru
   const prf      = profile.profile_card || {};
   const links    = prf.links || {};
 
-  // Dynamic placeholders or static values
   const avatarUrl = isDynamic ? '{{avatar_url}}' : '';
   const bio       = isDynamic ? '{{bio}}'        : (prf.bio      || '');
   const location  = isDynamic ? '{{location}}'   : (prf.location || '');
 
-  // Static fields from profile JSON — never change between requests
   const github   = links.github   || username;
   const discord  = links.discord  || '';
   const twitter  = links.twitter  || '';
   const linkedin = links.linkedin || '';
 
-  // Bio wrapping — for dynamic we use a single placeholder line
-  const bioLines = isDynamic
-    ? ['{{bio}}']
-    : wrapText(bio);
+  // For dynamic: single placeholder line. For static: wrap bio text.
+  const bioLines = isDynamic ? ['{{bio}}'] : wrapText(bio);
 
-  const AVATAR_R  = 30;   // avatar circle radius
-  const AVATAR_CX = 46;
-  const AVATAR_CY = 56;
+  const AVATAR_R  = 28;
+  const AVATAR_CX = 44;
+  const AVATAR_CY = 48;
   const WIDTH     = 320;
 
-  // Height depends on how many social links are present
+  // Layout — all text sits to the right of the avatar (x=88+)
+  // username: y=30
+  // bio lines: y=46, 60, ...
+  // location: y = 46 + bioLines.length * 14 + 8
+  const BIO_START_Y  = 46;
+  const BIO_LINE_H   = 14;
+  const locationY    = BIO_START_Y + bioLines.length * BIO_LINE_H + 8;
+  const dividerY     = locationY + 18;
+
   const socialLinks = [
     github   && { label: `github.com/${github}`,     color: c.accent  },
     discord  && { label: `discord: ${discord}`,      color: '#5865F2' },
-    twitter  && { label: `twitter: @${twitter}`,     color: '#1DA1F2' },
-    linkedin && { label: `linkedin: ${linkedin}`,    color: '#0A66C2' },
+    twitter  && { label: `@${twitter}`,              color: '#1DA1F2' },
+    linkedin && { label: `in/${linkedin}`,            color: '#0A66C2' },
   ].filter(Boolean);
 
-  const HEIGHT = 100 + bioLines.length * 16 + socialLinks.length * 16 + 16;
+  const HEIGHT = dividerY + 14 + socialLinks.length * 16 + (socialLinks.length ? 8 : 0);
 
-  // Avatar — embed as <image> if URL available, else initials circle
+  // Avatar
   const avatarSVG = avatarUrl
-    ? `<clipPath id="avatar-clip">
+    ? `<clipPath id="av">
     <circle cx="${AVATAR_CX}" cy="${AVATAR_CY}" r="${AVATAR_R}"/>
   </clipPath>
   <circle cx="${AVATAR_CX}" cy="${AVATAR_CY}" r="${AVATAR_R}" fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
   <image href="${escXML(avatarUrl)}" x="${AVATAR_CX - AVATAR_R}" y="${AVATAR_CY - AVATAR_R}"
-    width="${AVATAR_R * 2}" height="${AVATAR_R * 2}" clip-path="url(#avatar-clip)"/>`
+    width="${AVATAR_R * 2}" height="${AVATAR_R * 2}" clip-path="url(#av)"/>`
     : `<circle cx="${AVATAR_CX}" cy="${AVATAR_CY}" r="${AVATAR_R}" fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
-  <text x="${AVATAR_CX}" y="${AVATAR_CY + 6}" text-anchor="middle"
-    font-family="monospace" font-size="16" fill="${c.accent}" font-weight="700">${escXML(username.substring(0, 2).toUpperCase())}</text>`;
+  <text x="${AVATAR_CX}" y="${AVATAR_CY + 5}" text-anchor="middle"
+    font-family="monospace" font-size="14" fill="${c.accent}" font-weight="700">${escXML(username.substring(0, 2).toUpperCase())}</text>`;
 
-  // Online status dot
   const statusDot = `
-  <circle cx="${AVATAR_CX + AVATAR_R - 6}" cy="${AVATAR_CY + AVATAR_R - 6}" r="6"
+  <circle cx="${AVATAR_CX + AVATAR_R - 5}" cy="${AVATAR_CY + AVATAR_R - 5}" r="5"
     fill="${c.green}" stroke="${c.bg}" stroke-width="2"/>`;
 
-  // Bio lines
   const bioSVG = bioLines.map((line, i) =>
-    `<text x="90" y="${72 + i * 16}" font-family="monospace" font-size="10" fill="${c.muted}">${escXML(line)}</text>`
+    `<text x="88" y="${BIO_START_Y + i * BIO_LINE_H}" font-family="monospace" font-size="9" fill="${c.muted}">${escXML(line)}</text>`
   ).join('\n  ');
 
-  // Divider
-  const dividerY = 94 + bioLines.length * 16;
-
-  // Social links
   const socialSVG = socialLinks.map((l, i) =>
-    `<text x="18" y="${dividerY + 18 + i * 16}" font-family="monospace" font-size="9" fill="${escXML(l.color)}">${escXML(l.label)}</text>`
+    `<text x="18" y="${dividerY + 14 + i * 16}" font-family="monospace" font-size="9" fill="${escXML(l.color)}">${escXML(l.label)}</text>`
   ).join('\n  ');
 
   return `<svg viewBox="0 0 ${WIDTH} ${HEIGHT}" xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}">
   <rect width="${WIDTH}" height="${HEIGHT}" fill="${c.bg}" rx="8" stroke="${c.border}" stroke-width="1"/>
 
-  <!-- avatar -->
   ${avatarSVG}
   ${statusDot}
 
-  <!-- username + role -->
-  <text x="90" y="40" font-family="monospace" font-size="13" fill="${c.text}" font-weight="700">${escXML(username)}</text>
-  <text x="90" y="56" font-family="monospace" font-size="10" fill="${c.muted}">Full-stack Developer</text>
-  <text x="90" y="70" font-family="monospace" font-size="10" fill="${c.muted}">📍 ${escXML(location)}</text>
-
-  <!-- bio -->
+  <text x="88" y="30" font-family="monospace" font-size="13" fill="${c.text}" font-weight="700">${escXML(username)}</text>
   ${bioSVG}
+  <text x="88" y="${locationY}" font-family="monospace" font-size="9" fill="${c.muted}">📍 ${escXML(location)}</text>
 
-  <!-- divider -->
   <line x1="18" y1="${dividerY}" x2="${WIDTH - 18}" y2="${dividerY}" stroke="${c.border}" stroke-width="1"/>
-
-  <!-- social links -->
   ${socialSVG}
 </svg>`;
 };
