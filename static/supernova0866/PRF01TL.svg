@@ -1,0 +1,28 @@
+<svg viewBox="0 0 320 148" xmlns="http://www.w3.org/2000/svg" width="320" height="148">
+  <rect width="320" height="148" fill="#ffffff" rx="8" stroke="#d0d7de" stroke-width="1"/>
+
+  <!-- avatar -->
+  <clipPath id="avatar-clip">
+    <circle cx="46" cy="56" r="30"/>
+  </clipPath>
+  <circle cx="46" cy="56" r="30" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+  <image href="{{avatar_url}}" x="16" y="26"
+    width="60" height="60" clip-path="url(#avatar-clip)"/>
+  
+  <circle cx="70" cy="80" r="6"
+    fill="#1a7f37" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- username + role -->
+  <text x="90" y="40" font-family="monospace" font-size="13" fill="#1f2328" font-weight="700">supernova0866</text>
+  <text x="90" y="56" font-family="monospace" font-size="10" fill="#656d76">Full-stack Developer</text>
+  <text x="90" y="70" font-family="monospace" font-size="10" fill="#656d76">📍 {{location}}</text>
+
+  <!-- bio -->
+  <text x="90" y="72" font-family="monospace" font-size="10" fill="#656d76">{{bio}}</text>
+
+  <!-- divider -->
+  <line x1="18" y1="110" x2="302" y2="110" stroke="#d0d7de" stroke-width="1"/>
+
+  <!-- social links -->
+  <text x="18" y="128" font-family="monospace" font-size="9" fill="#0969da">github.com/supernova0866</text>
+</svg>
