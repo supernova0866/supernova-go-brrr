@@ -1,6 +1,6 @@
 {
   "username": "supernova0866",
-  "theme": "TT",
+  "theme": "TI",
   "profile_card": {
     "enabled": true,
     "location": "Outer Space",
@@ -79,7 +79,7 @@
   },
   "visitor_counter": {
     "enabled": true,
-    "count": 26
+    "count": 35
   },
   "stats": {
     "github_stats": {
