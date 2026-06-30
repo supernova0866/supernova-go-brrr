@@ -1,0 +1,28 @@
+<svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg" width="300" height="130">
+  <rect width="300" height="130" fill="#0a0a0a" rx="8" stroke="#00ff4133" stroke-width="1"/>
+
+  <!-- header -->
+  <text x="150" y="20" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#00aa2a">Contribution Streak</text>
+  <line x1="18" y1="26" x2="282" y2="26" stroke="#00ff4133" stroke-width="1"/>
+
+  <!-- current streak — big center number -->
+  <text x="150" y="66" text-anchor="middle"
+    font-family="monospace" font-size="34" fill="#ff6600" font-weight="700">🔥 {{streak}}</text>
+  <text x="150" y="82" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#00aa2a">current streak (days)</text>
+
+  <!-- divider -->
+  <line x1="18" y1="92" x2="282" y2="92" stroke="#00ff4133" stroke-width="1"/>
+
+  <!-- longest + total -->
+  <text x="75" y="110" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#00aa2a">longest</text>
+  <text x="75" y="124" text-anchor="middle"
+    font-family="monospace" font-size="12" fill="#00ff41" font-weight="700">{{longest}} days</text>
+
+  <text x="225" y="110" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#00aa2a">total</text>
+  <text x="225" y="124" text-anchor="middle"
+    font-family="monospace" font-size="12" fill="#00ff41" font-weight="700">{{total}}</text>
+</svg>
