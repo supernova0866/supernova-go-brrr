@@ -63,6 +63,19 @@
     #sidebar-header .info h1 { font-size: 0.82rem; font-weight: 700; }
     #sidebar-header .info span { font-size: 0.67rem; color: var(--muted); }
 
+    /* Global theme chip in sidebar header */
+    #sidebar-theme-chip {
+      margin-left: auto;
+      font-family: monospace;
+      font-size: 0.6rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      background: #388bfd15;
+      white-space: nowrap;
+    }
+
     .nav-section { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
 
     .nav-label {
@@ -564,23 +577,40 @@
       color: var(--text);
     }
 
-    .theme-check-row {
+    /* Global theme swatches on the settings card */
+    .global-theme-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    .global-theme-swatch {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .theme-check {
-      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.74rem;
-      color: var(--muted);
+      gap: 0.35rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
       cursor: pointer;
+      transition: all 0.12s;
+      min-width: 64px;
     }
 
-    .theme-check input { accent-color: var(--blue); cursor: pointer; }
-    .theme-check:hover { color: var(--text); }
+    .global-theme-swatch:hover { border-color: var(--muted); }
+    .global-theme-swatch.active { border-color: var(--blue); background: #388bfd12; }
+
+    .swatch-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+
+    .global-theme-swatch span {
+      font-family: monospace;
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    .global-theme-swatch.active span { color: var(--blue); }
 
     /* ── SCROLLBAR ───────────────────────────── */
     #main::-webkit-scrollbar { width: 6px; }
@@ -605,6 +635,7 @@
       <h1 id="nav-username">supernova0866</h1>
       <span>dashboard</span>
     </div>
+    <span id="sidebar-theme-chip">TD</span>
   </div>
 
   <div class="nav-section">
@@ -647,7 +678,7 @@
   </div>
   <div class="nav-section">
     <div class="nav-label">Config</div>
-    <a class="nav-item" href="#settings">Themes &amp; Settings</a>
+    <a class="nav-item" href="#settings">Theme &amp; Settings</a>
   </div>
 
   <div class="nav-bottom">
@@ -668,7 +699,7 @@
     <div class="editor-card">
       <div class="editor-card-header">
         <h3>Animated Typing Banner</h3>
-        <span class="code-badge">BNR01TD</span>
+        <span class="code-badge" id="bnr-typing-badge">BNR01TD</span>
       </div>
       <div class="editor-body">
         <div class="controls-panel">
@@ -716,7 +747,7 @@
     <div class="editor-card">
       <div class="editor-card-header">
         <h3>Static Hero Banner</h3>
-        <span class="code-badge">BNR02TD</span>
+        <span class="code-badge" id="bnr-hero-badge">BNR02TD</span>
       </div>
       <div class="editor-body">
         <div class="controls-panel">
@@ -753,7 +784,7 @@
     <div class="editor-card">
       <div class="editor-card-header">
         <h3>Wave Banner</h3>
-        <span class="code-badge">BNR03TD</span>
+        <span class="code-badge" id="bnr-wave-badge">BNR03TD</span>
       </div>
       <div class="editor-body">
         <div class="controls-panel">
@@ -785,7 +816,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>GitHub Stats Card</h3><span class="code-badge">GHS01TD</span></div>
+      <div class="editor-card-header"><h3>GitHub Stats Card</h3><span class="code-badge" id="ghs-badge">GHS01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="ghs-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -805,7 +836,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Streak Card</h3><span class="code-badge">STK01TD</span></div>
+      <div class="editor-card-header"><h3>Streak Card</h3><span class="code-badge" id="stk-badge">STK01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="stk-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -825,7 +856,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Top Languages Card</h3><span class="code-badge">TPL01TD</span></div>
+      <div class="editor-card-header"><h3>Top Languages Card</h3><span class="code-badge" id="tpl-badge">TPL01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="tpl-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -846,7 +877,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Full Profile Card</h3><span class="code-badge">PRF01TD</span></div>
+      <div class="editor-card-header"><h3>Full Profile Card</h3><span class="code-badge" id="prf-badge">PRF01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="prf-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -876,7 +907,7 @@
       <span class="section-tag tag-static">static</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Currently Working On</h3><span class="code-badge">CWO01TD</span></div>
+      <div class="editor-card-header"><h3>Currently Working On</h3><span class="code-badge" id="cwo-badge">CWO01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="cwo-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -973,7 +1004,7 @@
       <span class="section-tag tag-static">static</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Shields.io-style Badges</h3><span class="code-badge">BGS01TD</span></div>
+      <div class="editor-card-header"><h3>Shields.io-style Badges</h3><span class="code-badge" id="bgs-badge">BGS01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="bgs-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -999,7 +1030,7 @@
       <span class="section-tag tag-static">static</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Social Links Row</h3><span class="code-badge">SCL01TD</span></div>
+      <div class="editor-card-header"><h3>Social Links Row</h3><span class="code-badge" id="scl-badge">SCL01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="scl-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -1027,7 +1058,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Visitor Counter</h3><span class="code-badge">VSC01TD</span></div>
+      <div class="editor-card-header"><h3>Visitor Counter</h3><span class="code-badge" id="vsc-badge">VSC01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="vsc-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -1047,7 +1078,7 @@
       <span class="section-tag tag-query">query-driven</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Custom Buttons</h3><span class="code-badge">CBT01TD</span></div>
+      <div class="editor-card-header"><h3>Custom Buttons</h3><span class="code-badge" id="cbt-badge">CBT01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <p class="hint">Fully stateless — no Apply needed. Build your URL here and copy it directly into your README.</p>
@@ -1073,7 +1104,7 @@
       <span class="section-tag tag-query">query-driven</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Single Image Banner</h3><span class="code-badge">IMG01TD</span></div>
+      <div class="editor-card-header"><h3>Single Image Banner</h3><span class="code-badge" id="img1-badge">IMG01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <p class="hint">Paste any direct image URL. The SVG wraps it with your chosen dimensions.</p>
@@ -1099,7 +1130,7 @@
       <span class="section-tag tag-query">query-driven</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Image Grid</h3><span class="code-badge">IMG02TD</span></div>
+      <div class="editor-card-header"><h3>Image Grid</h3><span class="code-badge" id="img2-badge">IMG02TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="row-2">
@@ -1130,7 +1161,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Discord Presence Card</h3><span class="code-badge">DCS01TD</span></div>
+      <div class="editor-card-header"><h3>Discord Presence Card</h3><span class="code-badge" id="dcs-badge">DCS01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="dcs-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -1151,7 +1182,7 @@
       <span class="section-tag tag-dynamic">dynamic</span>
     </div>
     <div class="editor-card">
-      <div class="editor-card-header"><h3>Spotify Now Playing</h3><span class="code-badge">SPT01TD</span></div>
+      <div class="editor-card-header"><h3>Spotify Now Playing</h3><span class="code-badge" id="spt-badge">SPT01TD</span></div>
       <div class="editor-body">
         <div class="controls-panel">
           <div class="toggle-row"><label>Enabled</label><label class="toggle"><input type="checkbox" id="spt-enabled" onchange="markDirty()"><span class="toggle-slider"></span></label></div>
@@ -1172,16 +1203,31 @@
 
   <!-- ═══════════ SETTINGS ═══════════ -->
   <div class="section" id="settings">
-    <div class="section-header"><h2>Themes &amp; Settings</h2></div>
+    <div class="section-header"><h2>Theme &amp; Settings</h2></div>
     <div class="settings-grid">
-      <div class="settings-card">
-        <h4>Generate themes on Apply</h4>
-        <p class="hint" style="font-size:0.7rem;">Each enabled theme produces a separate SVG file per card — e.g. <code>BNR01TD.svg</code>, <code>BNR01TL.svg</code>.</p>
-        <div class="theme-check-row">
-          <label class="theme-check"><input type="checkbox" id="theme-TD" onchange="markDirty()"> TD — Dark</label>
-          <label class="theme-check"><input type="checkbox" id="theme-TL" onchange="markDirty()"> TL — Light</label>
-          <label class="theme-check"><input type="checkbox" id="theme-TT" onchange="markDirty()"> TT — Terminal</label>
-          <label class="theme-check"><input type="checkbox" id="theme-TI" onchange="markDirty()"> TI — Ivory</label>
+      <div class="settings-card" style="grid-column: 1 / -1;">
+        <h4>Your theme</h4>
+        <p class="hint" style="font-size:0.7rem;">
+          Pick one theme — it applies to <strong>every</strong> card you generate (banners, stats, badges, profile, everything).
+          Hitting Apply regenerates all your SVGs in this theme only.
+        </p>
+        <div class="global-theme-row" id="global-theme-row">
+          <div class="global-theme-swatch active" data-theme="TD" onclick="setGlobalTheme('TD', this)">
+            <span class="swatch-dot" style="background:#161b22;"></span>
+            <span>TD Dark</span>
+          </div>
+          <div class="global-theme-swatch" data-theme="TL" onclick="setGlobalTheme('TL', this)">
+            <span class="swatch-dot" style="background:#ffffff;"></span>
+            <span>TL Light</span>
+          </div>
+          <div class="global-theme-swatch" data-theme="TT" onclick="setGlobalTheme('TT', this)">
+            <span class="swatch-dot" style="background:#0a0a0a;border-color:#00ff41;"></span>
+            <span>TT Terminal</span>
+          </div>
+          <div class="global-theme-swatch" data-theme="TI" onclick="setGlobalTheme('TI', this)">
+            <span class="swatch-dot" style="background:#fdf6e3;"></span>
+            <span>TI Ivory</span>
+          </div>
         </div>
       </div>
       <div class="settings-card">
@@ -1202,12 +1248,30 @@
 
 <script>
 // ── State ──────────────────────────────────────
-let profile  = {};
-let username = '';
-let dirty    = false;
-let dvsVariant = 1;
+let profile      = {};
+let username     = '';
+let dirty        = false;
+let dvsVariant   = 1;
+let currentTheme = 'TD'; // single global theme — applies to every generated card
 let bgsId = 0, cbtId = 0, img2Id = 0;
 const HOST = window.location.origin;
+
+// Card id → /category/CODE path (theme suffix appended dynamically)
+const CARD_PATHS = {
+  'bnr-typing': { category: 'banner',  code: 'BNR01' },
+  'bnr-hero':   { category: 'banner',  code: 'BNR02' },
+  'bnr-wave':   { category: 'banner',  code: 'BNR03' },
+  ghs:          { category: 'stats',   code: 'GHS01' },
+  stk:          { category: 'stats',   code: 'STK01' },
+  tpl:          { category: 'stats',   code: 'TPL01' },
+  prf:          { category: 'profile', code: 'PRF01' },
+  cwo:          { category: 'profile', code: 'CWO01' },
+  bgs:          { category: 'badges',  code: 'BGS01' },
+  scl:          { category: 'social',  code: 'SCL01' },
+  vsc:          { category: 'social',  code: 'VSC01' },
+  dcs:          { category: 'discord', code: 'DCS01' },
+  spt:          { category: 'spotify', code: 'SPT01' },
+};
 
 // ── Sidebar active highlight on scroll ─────────
 const observer = new IntersectionObserver(entries => {
@@ -1292,13 +1356,12 @@ function populateAll() {
   const dvs = p.dev_setup || {};
   check('dvs-enabled', dvs.enabled);
   dvsVariant = dvs.variant || 1;
-  document.querySelectorAll('#dvs ~ * .variant-btn, .variant-btn').forEach((btn, i) => {
+  document.querySelectorAll('#dvs .variant-btn').forEach((btn, i) => {
     btn.classList.toggle('active', i + 1 === dvsVariant);
   });
   selectIcons('dvs-software', dvs.software || []);
   selectIcons('dvs-languages', dvs.languages || []);
   selectIcons('dvs-os', dvs.os || []);
-  updateDVSBadge();
 
   check('bgs-enabled', p.badges?.enabled);
   (p.badges?.items || []).forEach(item => addBGS(item));
@@ -1324,30 +1387,17 @@ function populateAll() {
     btn.style.opacity = '0.7';
   }
 
-  const themes = p.themes || ['TD'];
-  ['TD','TL','TT','TI'].forEach(t => check('theme-' + t, themes.includes(t)));
+  // ── Global theme — single value, falls back to legacy `themes[0]` if present ──
+  currentTheme = (p.theme || p.themes?.[0] || 'TD');
+  if (!['TD', 'TL', 'TT', 'TI'].includes(currentTheme)) currentTheme = 'TD';
+  applyGlobalThemeToUI(currentTheme);
 
-  // Set URL fields
-  setURL('bnr-typing-url', `/svg/${username}/banner/BNR01TD`);
-  setURL('bnr-hero-url',   `/svg/${username}/banner/BNR02TD`);
-  setURL('bnr-wave-url',   `/svg/${username}/banner/BNR03TD`);
-  setURL('ghs-url',        `/svg/${username}/stats/GHS01TD`);
-  setURL('stk-url',        `/svg/${username}/stats/STK01TD`);
-  setURL('tpl-url',        `/svg/${username}/stats/TPL01TD`);
-  setURL('prf-url',        `/svg/${username}/profile/PRF01TD`);
-  setURL('cwo-url-copy',   `/svg/${username}/profile/CWO01TD`);
-  setURL('dvs-url',        `/svg/${username}/setup/DVS0${dvsVariant}TD`);
-  setURL('bgs-url',        `/svg/${username}/badges/BGS01TD`);
-  setURL('scl-url',        `/svg/${username}/social/SCL01TD`);
-  setURL('vsc-url',        `/svg/${username}/social/VSC01TD`);
-  setURL('dcs-url',        `/svg/${username}/discord/DCS01TD`);
-  setURL('spt-url',        `/svg/${username}/spotify/SPT01TD`);
+  updateAllBadgesAndURLs();
 }
 
 function val(id, v) { const e = document.getElementById(id); if (e) e.value = v; }
 function check(id, v) { const e = document.getElementById(id); if (e) e.checked = !!v; }
 function slider(id, v, labelId) { val(id, v); val(labelId, v); }
-function setURL(id, url) { val(id, `${HOST}${url}`); }
 
 function selectIcons(gridId, selected) {
   document.querySelectorAll(`#${gridId} .icon-chip`).forEach(chip => {
@@ -1355,33 +1405,73 @@ function selectIcons(gridId, selected) {
   });
 }
 
+// ── Global theme ────────────────────────────────
+function applyGlobalThemeToUI(theme) {
+  document.querySelectorAll('.global-theme-swatch').forEach(sw => {
+    sw.classList.toggle('active', sw.dataset.theme === theme);
+  });
+  document.getElementById('sidebar-theme-chip').textContent = theme;
+  updateAllBadgesAndURLs();
+}
+
+function setGlobalTheme(theme, el) {
+  if (currentTheme === theme) return;
+  currentTheme = theme;
+  applyGlobalThemeToUI(theme);
+  markDirty();
+  renderPreviews(); // previews reflect the new theme immediately (server regenerates on Apply)
+}
+
+function updateAllBadgesAndURLs() {
+  Object.entries(CARD_PATHS).forEach(([key, { category, code }]) => {
+    const fullCode = `${code}${currentTheme}`;
+    const badge = document.getElementById(`${key}-badge`);
+    if (badge) badge.textContent = fullCode;
+    const urlInput = document.getElementById(key === 'cwo' ? 'cwo-url-copy' : `${key}-url`);
+    if (urlInput) urlInput.value = `${HOST}/svg/${username}/${category}/${fullCode}`;
+  });
+  // DVS uses a variant-dependent code
+  updateDVSBadge();
+  // Image cards re-rendered separately (query-driven, theme still applies to bg/border)
+  const img1Badge = document.getElementById('img1-badge');
+  if (img1Badge) img1Badge.textContent = `IMG01${currentTheme}`;
+  const img2Badge = document.getElementById('img2-badge');
+  if (img2Badge) img2Badge.textContent = `IMG02${currentTheme}`;
+  const cbtBadge = document.getElementById('cbt-badge');
+  if (cbtBadge) cbtBadge.textContent = `CBT01${currentTheme}`;
+}
+
 // ── Render previews ────────────────────────────
 function renderPreviews() {
-  ['bnr-typing','bnr-hero','bnr-wave','ghs','stk','tpl','prf','cwo','dvs','bgs','scl','vsc','dcs','spt'].forEach(key => {
-    const map = {
-      'bnr-typing': `banner/BNR01TD`, 'bnr-hero': `banner/BNR02TD`, 'bnr-wave': `banner/BNR03TD`,
-      ghs: `stats/GHS01TD`, stk: `stats/STK01TD`, tpl: `stats/TPL01TD`,
-      prf: `profile/PRF01TD`, cwo: `profile/CWO01TD`,
-      dvs: `setup/DVS0${dvsVariant}TD`, bgs: `badges/BGS01TD`,
-      scl: `social/SCL01TD`, vsc: `social/VSC01TD`,
-      dcs: `discord/DCS01TD`, spt: `spotify/SPT01TD`,
-    };
+  Object.keys(CARD_PATHS).forEach(key => {
+    const { category, code } = CARD_PATHS[key];
     const frame = document.getElementById(`${key}-preview`);
     if (!frame) return;
-    const url = `/svg/${username}/${map[key]}?_=${Date.now()}`;
+    const url = `/svg/${username}/${category}/${code}${currentTheme}?_=${Date.now()}`;
     frame.innerHTML = `<img src="${url}" style="max-width:100%;" alt="SVG"
       onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.7rem;color:var(--muted);font-family:monospace;\\'>not generated yet — hit Apply first</span>'" />`;
   });
+  renderDVSPreview();
   renderCBT();
   renderIMG1();
   renderIMG2();
+  updateAllBadgesAndURLs();
+}
+
+function renderDVSPreview() {
+  const frame = document.getElementById('dvs-preview');
+  if (!frame) return;
+  const pad = String(dvsVariant).padStart(2, '0');
+  const url = `/svg/${username}/setup/DVS${pad}${currentTheme}?_=${Date.now()}`;
+  frame.innerHTML = `<img src="${url}" style="max-width:100%;" alt="Dev setup"
+    onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.7rem;color:var(--muted);font-family:monospace;\\'>not generated yet — hit Apply first</span>'" />`;
 }
 
 // ── Query-driven previews ──────────────────────
 function renderCBT() {
   const btns = getCBTs();
   const qs   = btns.map(b => encodeURIComponent(`${b.label}_${b.color.replace('#','')}`)).join('&');
-  const url  = `${HOST}/svg/${username}/buttons/CBT01TD${qs ? '?' + qs : ''}`;
+  const url  = `${HOST}/svg/${username}/buttons/CBT01${currentTheme}${qs ? '?' + qs : ''}`;
   val('cbt-url', url);
   const frame = document.getElementById('cbt-preview');
   frame.innerHTML = `<img src="${url}" style="max-width:100%;" alt="Custom buttons" />`;
@@ -1392,7 +1482,7 @@ function renderIMG1() {
   const w = document.getElementById('img1-w').value || 600;
   const h = document.getElementById('img1-h').value || 200;
   const r = document.getElementById('img1-r').value || 8;
-  const url = `${HOST}/svg/${username}/image/IMG01TD?url=${encodeURIComponent(imgUrl)}&w=${w}&h=${h}&r=${r}`;
+  const url = `${HOST}/svg/${username}/image/IMG01${currentTheme}?url=${encodeURIComponent(imgUrl)}&w=${w}&h=${h}&r=${r}`;
   val('img1-url-copy', url);
   document.getElementById('img1-preview').innerHTML = `<img src="${url}" style="max-width:100%;" alt="Image banner" />`;
 }
@@ -1404,7 +1494,7 @@ function renderIMG2() {
   const gap  = document.getElementById('img2-gap').value || 8;
   const urls = [...document.querySelectorAll('#img2-list input[type="text"]')].map(i => i.value.trim()).filter(Boolean);
   const qs   = `cols=${cols}&cw=${cw}&ch=${ch}&gap=${gap}` + (urls.length ? '&' + urls.map(u => `url=${encodeURIComponent(u)}`).join('&') : '');
-  const url  = `${HOST}/svg/${username}/image/IMG02TD?${qs}`;
+  const url  = `${HOST}/svg/${username}/image/IMG02${currentTheme}?${qs}`;
   val('img2-url-copy', url);
   document.getElementById('img2-preview').innerHTML = `<img src="${url}" style="max-width:100%;" alt="Image grid" />`;
 }
@@ -1415,13 +1505,16 @@ function setDVSVariant(v, btn) {
   btn.closest('.variant-picker').querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   updateDVSBadge();
+  renderDVSPreview();
   markDirty();
 }
 
 function updateDVSBadge() {
-  const pad = String(dvsVariant).padStart(2,'0');
-  document.getElementById('dvs-badge').textContent = `DVS${pad}TD`;
-  setURL('dvs-url', `/svg/${username}/setup/DVS${pad}TD`);
+  const pad = String(dvsVariant).padStart(2, '0');
+  const badge = document.getElementById('dvs-badge');
+  if (badge) badge.textContent = `DVS${pad}${currentTheme}`;
+  const urlInput = document.getElementById('dvs-url');
+  if (urlInput) urlInput.value = `${HOST}/svg/${username}/setup/DVS${pad}${currentTheme}`;
 }
 
 function toggleIcon(chip) { chip.classList.toggle('selected'); markDirty(); }
@@ -1493,12 +1586,19 @@ function copyURL(id) {
   });
 }
 
+function escAttr(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function getSelected(gridId) {
+  return [...document.querySelectorAll(`#${gridId} .icon-chip.selected`)].map(c => c.dataset.val);
+}
+
 // ── Collect ────────────────────────────────────
 function collectProfile() {
-  const themes = ['TD','TL','TT','TI'].filter(t => document.getElementById('theme-' + t)?.checked);
   return {
     ...profile,
-    themes: themes.length ? themes : ['TD'],
+    theme: currentTheme, // single global theme — drives every generated card
     banners: {
       animated_typing: {
         enabled:         document.getElementById('bnr-typing-enabled').checked,
@@ -1562,4 +1662,54 @@ function collectProfile() {
     },
     visitor_counter: { ...profile.visitor_counter, enabled: document.getElementById('vsc-enabled').checked },
     discord: { enabled: document.getElementById('dcs-enabled').checked, user_id: document.getElementById('dcs-uid').value },
-    spotify
+    spotify: {
+      enabled:           document.getElementById('spt-enabled').checked,
+      show_last_played:  document.getElementById('spt-last').checked,
+      // access_token / refresh_token / expires_at are preserved server-side on save
+    },
+  };
+}
+
+// ── Apply ──────────────────────────────────────
+async function applyChanges() {
+  const btn = document.getElementById('apply-btn');
+  btn.disabled = true;
+  setStatus('saving…', 'saving');
+
+  try {
+    const body = collectProfile();
+    const res  = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || `Request failed (${res.status})`);
+    }
+
+    // Keep local profile state in sync with what was just saved
+    profile = { ...profile, ...body };
+    dirty = false;
+
+    const failed = (data.results || []).filter(r => !r.ok);
+    if (failed.length) {
+      setStatus(`saved with ${failed.length} error(s) — check console`, 'error');
+      console.warn('Generator errors:', failed);
+    } else {
+      setStatus('all changes saved', 'saved');
+    }
+
+    // Re-render every preview now that fresh SVGs exist on disk
+    renderPreviews();
+  } catch (err) {
+    console.error(err);
+    setStatus(`save failed: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
