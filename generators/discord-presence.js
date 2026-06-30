@@ -1,6 +1,6 @@
 // generators/discord-presence.js
 // DCS01 — Discord presence card
-// Dynamic — {{status}} {{activity_type}} {{activity_name}} {{activity_detail}} {{elapsed}}
+// Dynamic — {{status}} {{dot_color}} {{activity_type}} {{activity_name}} {{activity_detail}} {{elapsed}}
 // injected at serve time via Lanyard API
 
 'use strict';
@@ -21,10 +21,9 @@ function escXML(str) {
     .replace(/'/g, '&apos;');
 }
 
-// Status dot color by status string
 function statusColor(status, c) {
-  if (status.includes('online'))        return c.green;
-  if (status.includes('idle'))          return c.idle;
+  if (status.includes('online'))                              return c.green;
+  if (status.includes('idle'))                               return c.idle;
   if (status.includes('do not disturb') || status === 'dnd') return c.dnd;
   return c.offline;
 }
@@ -33,15 +32,12 @@ module.exports = function generateDCS01(profile, { theme = 'TD', isDynamic = tru
   const c        = THEMES[theme] || THEMES.TD;
   const username = profile.username || '';
 
-  const status         = isDynamic ? '{{status}}'          : 'offline';
-  const activity_type  = isDynamic ? '{{activity_type}}'   : '';
-  const activity_name  = isDynamic ? '{{activity_name}}'   : '';
+  const status          = isDynamic ? '{{status}}'          : 'offline';
+  const dotColor        = isDynamic ? '{{dot_color}}'       : statusColor('offline', c);
+  const activity_type   = isDynamic ? '{{activity_type}}'   : '';
+  const activity_name   = isDynamic ? '{{activity_name}}'   : '';
   const activity_detail = isDynamic ? '{{activity_detail}}' : '';
-  const elapsed        = isDynamic ? '{{elapsed}}'         : '';
-
-  // Status dot color — for dynamic we default to green, server injects correct color
-  // For the dot we use a CSS approach at serve time via the status value
-  const dotColor = isDynamic ? c.green : statusColor(status, c);
+  const elapsed         = isDynamic ? '{{elapsed}}'         : '';
 
   const WIDTH  = 300;
   const HEIGHT = 140;
@@ -61,9 +57,9 @@ module.exports = function generateDCS01(profile, { theme = 'TD', isDynamic = tru
   <text x="46" y="22" font-family="monospace" font-size="12"
     fill="${c.text}" font-weight="700">${escXML(username)}</text>
 
-  <!-- status dot + label -->
-  <circle cx="46" cy="34" r="5" fill="${dotColor}" stroke="${c.bg}" stroke-width="2"/>
-  <text x="57" y="38" font-family="monospace" font-size="9" fill="${dotColor}">${escXML(status)}</text>
+  <!-- status dot + label — dot_color injected dynamically -->
+  <circle cx="46" cy="34" r="5" fill="${escXML(dotColor)}" stroke="${c.bg}" stroke-width="2"/>
+  <text x="57" y="38" font-family="monospace" font-size="9" fill="${escXML(dotColor)}">${escXML(status)}</text>
 
   <!-- divider -->
   <line x1="14" y1="48" x2="${WIDTH - 14}" y2="48" stroke="${c.border}" stroke-width="1"/>
@@ -72,7 +68,7 @@ module.exports = function generateDCS01(profile, { theme = 'TD', isDynamic = tru
   <text x="14" y="64" font-family="monospace" font-size="9"
     fill="${c.muted}" letter-spacing="0.5">${escXML(activity_type)}</text>
 
-  <!-- activity icon placeholder box -->
+  <!-- activity icon placeholder -->
   <rect x="14" y="70" width="34" height="34" rx="4"
     fill="${c.surface}" stroke="${c.border}" stroke-width="1"/>
   <text x="31" y="91" text-anchor="middle" font-family="monospace" font-size="10"
