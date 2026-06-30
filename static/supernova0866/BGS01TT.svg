@@ -1,0 +1,4 @@
+<svg viewBox="0 0 300 32" xmlns="http://www.w3.org/2000/svg" width="300" height="32">
+  <rect width="300" height="32" fill="#0a0a0a" rx="4"/>
+  <text x="10" y="20" font-family="monospace" font-size="10" fill="#00aa2a">no badges configured</text>
+</svg>
