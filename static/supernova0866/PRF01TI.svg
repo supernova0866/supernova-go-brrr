@@ -1,0 +1,20 @@
+<svg viewBox="0 0 320 124" xmlns="http://www.w3.org/2000/svg" width="320" height="124">
+  <rect width="320" height="124" fill="#fdf6e3" rx="8" stroke="#d3c9a1" stroke-width="1"/>
+
+  <clipPath id="av">
+    <circle cx="44" cy="48" r="28"/>
+  </clipPath>
+  <circle cx="44" cy="48" r="28" fill="#eee8d5" stroke="#d3c9a1" stroke-width="1"/>
+  <image href="{{avatar_url}}" x="16" y="20"
+    width="56" height="56" clip-path="url(#av)"/>
+  
+  <circle cx="67" cy="71" r="5"
+    fill="#859900" stroke="#fdf6e3" stroke-width="2"/>
+
+  <text x="88" y="30" font-family="monospace" font-size="13" fill="#586e75" font-weight="700">supernova0866</text>
+  <text x="88" y="46" font-family="monospace" font-size="9" fill="#93a1a1">{{bio}}</text>
+  <text x="88" y="68" font-family="monospace" font-size="9" fill="#93a1a1">📍 {{location}}</text>
+
+  <line x1="18" y1="86" x2="302" y2="86" stroke="#d3c9a1" stroke-width="1"/>
+  <text x="18" y="100" font-family="monospace" font-size="9" fill="#268bd2">github.com/supernova0866</text>
+</svg>
