@@ -1,0 +1,95 @@
+{
+  "username": "supernova0866",
+  "theme": "TT",
+  "profile_card": {
+    "enabled": true,
+    "location": "Outer Space",
+    "bio": "full-stack dev · open source",
+    "links": {
+      "github": "",
+      "discord": "",
+      "twitter": "",
+      "linkedin": ""
+    }
+  },
+  "banners": {
+    "animated_typing": {
+      "enabled": false,
+      "tagline": "full-stack dev · open source",
+      "speed": 100,
+      "backspace_speed": 60,
+      "pause_ms": 1200
+    },
+    "hero": {
+      "enabled": false,
+      "tagline": "full-stack dev · open source",
+      "status": "building"
+    },
+    "wave": {
+      "enabled": false,
+      "tagline": "full-stack dev · open source"
+    }
+  },
+  "currently_working_on": {
+    "enabled": false,
+    "project": "nova",
+    "description": "brand new personal website",
+    "url": ""
+  },
+  "dev_setup": {
+    "enabled": true,
+    "variant": 1,
+    "software": [
+      "vscode",
+      "replit"
+    ],
+    "languages": [
+      "python",
+      "javascript",
+      "typescript"
+    ],
+    "os": [
+      "windows"
+    ]
+  },
+  "social_links": {
+    "enabled": true,
+    "show": [
+      "github",
+      "discord"
+    ],
+    "links": {
+      "github": "https://github.com/supernova0866",
+      "discord": "https://discord.com/users/875703615099134013",
+      "twitter": "",
+      "linkedin": ""
+    }
+  },
+  "discord": {
+    "enabled": true,
+    "user_id": "875703615099134013"
+  },
+  "spotify": {
+    "enabled": false,
+    "show_last_played": false
+  },
+  "badges": {
+    "enabled": false,
+    "items": []
+  },
+  "visitor_counter": {
+    "enabled": true,
+    "count": 26
+  },
+  "stats": {
+    "github_stats": {
+      "enabled": true
+    },
+    "streak": {
+      "enabled": true
+    },
+    "top_languages": {
+      "enabled": true
+    }
+  }
+}
