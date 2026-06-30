@@ -1,0 +1,51 @@
+<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" width="700" height="100">
+  <rect width="700" height="100" fill="#fdf6e3" rx="8"/>
+  
+    <style>
+      .tw-text {
+        animation: typing 3680ms steps(13, end) infinite;
+        font-family: monospace;
+        font-size: 22px;
+        fill: #268bd2;
+        font-weight: 700;
+      }
+      .tw-clip {
+        animation: clip-grow 3680ms steps(13, end) infinite;
+      }
+      .tw-cursor {
+        animation: blink 0.53s step-end infinite,
+                   cursor-move 3680ms steps(13, end) infinite;
+        fill: #268bd2;
+      }
+      @keyframes clip-grow {
+        0%                    { clip-path: inset(0 171.6px 0 0); }
+        35.33%  { clip-path: inset(0 0px 0 0); }
+        67.93% { clip-path: inset(0 0px 0 0); }
+        89.13%  { clip-path: inset(0 171.6px 0 0); }
+        100%                  { clip-path: inset(0 171.6px 0 0); }
+      }
+      @keyframes cursor-move {
+        0%                    { transform: translateX(0px); }
+        35.33%  { transform: translateX(171.6px); }
+        67.93% { transform: translateX(171.6px); }
+        89.13%  { transform: translateX(0px); }
+        100%                  { transform: translateX(0px); }
+      }
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0; }
+      }
+    </style>
+
+  <!-- typing text clipped to simulate character-by-character reveal -->
+  <g class="tw-clip" style="clip-path: inset(0 171.6px 0 0);">
+    <text class="tw-text" x="264.2" y="50">{{username}}</text>
+  </g>
+
+  <!-- blinking cursor -->
+  <rect class="tw-cursor" x="264.2" y="30" width="2" height="24" rx="1"/>
+
+  <!-- static tagline below -->
+  <text x="350" y="76" text-anchor="middle"
+    font-family="monospace" font-size="13" fill="#93a1a1">{{tagline}}</text>
+</svg>
