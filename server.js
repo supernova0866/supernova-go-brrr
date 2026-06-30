@@ -175,6 +175,14 @@ function inject(template, vars) {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? '');
 }
 
+// ── Discord status → color ────────────────────
+function discordDotColor(status) {
+  if (status.includes('online'))                              return '#3fb950';
+  if (status.includes('idle'))                               return '#e3b341';
+  if (status.includes('do not disturb') || status === 'dnd') return '#f78166';
+  return '#7d8590';
+}
+
 // ── GitHub API ────────────────────────────────
 async function fetchGitHubStats(username, token) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -211,7 +219,6 @@ async function fetchGitHubStats(username, token) {
 }
 
 async function fetchGitHubCommits(username, token) {
-  // Use search API for total commit count approximation
   const headers = token
     ? { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' }
     : { Accept: 'application/vnd.github.v3+json' };
@@ -220,6 +227,40 @@ async function fetchGitHubCommits(username, token) {
     { headers }
   );
   return result.total_count || 0;
+}
+
+async function fetchGitHubStreak(username, token) {
+  if (!token) return { streak: 0, longest: 0, total: 0 };
+  const query = `{ user(login: "${username}") { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date } } } } } }`;
+  try {
+    const data = await fetchJSON('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
+    const cal = data?.data?.user?.contributionsCollection?.contributionCalendar;
+    if (!cal) return { streak: 0, longest: 0, total: 0 };
+
+    const days = cal.weeks.flatMap(w => w.contributionDays)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const total = cal.totalContributions;
+
+    // Current streak — count back from today; skip today if no contributions yet
+    let i = days.length - 1;
+    const today = new Date().toISOString().split('T')[0];
+    if (i >= 0 && days[i].date === today && days[i].contributionCount === 0) i--;
+    let streak = 0;
+    while (i >= 0 && days[i].contributionCount > 0) { streak++; i--; }
+
+    // Longest streak
+    let longest = 0, run = 0;
+    for (const d of days) {
+      if (d.contributionCount > 0) { run++; if (run > longest) longest = run; }
+      else run = 0;
+    }
+
+    return { streak, longest, total };
+  } catch { return { streak: 0, longest: 0, total: 0 }; }
 }
 
 // ── Lanyard (Discord presence) ────────────────
@@ -364,10 +405,16 @@ async function serveSVG(res, username, code, theme, query = {}) {
     };
   }
 
-  // ── STK01 — streak (no official API; placeholder for custom implementation)
+  // ── STK01 — streak via GitHub GraphQL contributions API
   else if (code === 'STK01') {
-    vars = { streak: '?', longest: '?', total: '?' };
-    // TODO: implement streak fetching via GitHub contributions API or third-party
+    const session = [...sessions.values()].find(s => s.username === username);
+    const token   = session?.access_token || null;
+    const sk      = await fetchGitHubStreak(username, token).catch(() => ({ streak: 0, longest: 0, total: 0 }));
+    vars = {
+      streak:  String(sk.streak),
+      longest: String(sk.longest),
+      total:   String(sk.total),
+    };
   }
 
   // ── TPL01 — top languages
@@ -412,6 +459,7 @@ async function serveSVG(res, username, code, theme, query = {}) {
       activity_detail: '',
       elapsed: '',
     };
+    vars.dot_color = discordDotColor(vars.status);
   }
 
   // ── SPT01 — Spotify now playing
@@ -494,6 +542,12 @@ async function router(req, res) {
   // ── Landing page ───────────────────────────
   if (url === '/' || url === '/index.html') {
     serveFile(res, path.join(PUBLIC_DIR, 'index.html'));
+    return;
+  }
+
+  // ── Mobile fallback ────────────────────────
+  if (url === '/mobile') {
+    serveFile(res, path.join(PUBLIC_DIR, 'mobile.html'));
     return;
   }
 
