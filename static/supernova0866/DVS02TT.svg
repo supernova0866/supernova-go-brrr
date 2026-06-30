@@ -1,0 +1,28 @@
+<svg viewBox="0 0 495.20000000000005 42" xmlns="http://www.w3.org/2000/svg" width="495.20000000000005" height="42">
+  <rect width="495.20000000000005" height="42" fill="#0a0a0a" rx="6"/>
+  
+  <rect x="10" y="9" width="68.4" height="24" rx="4"
+    fill="#111111" stroke="#007ACC55" stroke-width="1"/>
+  <text x="44.2" y="25" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#007ACC">VS Code</text>
+  <rect x="84.4" y="9" width="61.2" height="24" rx="4"
+    fill="#111111" stroke="#F2620755" stroke-width="1"/>
+  <text x="115" y="25" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#F26207">Replit</text>
+  <rect x="151.60000000000002" y="9" width="61.2" height="24" rx="4"
+    fill="#111111" stroke="#3572A555" stroke-width="1"/>
+  <text x="182.20000000000002" y="25" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#3572A5">Python</text>
+  <rect x="218.8" y="9" width="90" height="24" rx="4"
+    fill="#111111" stroke="#F7DF1E55" stroke-width="1"/>
+  <text x="263.8" y="25" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#F7DF1E">JavaScript</text>
+  <rect x="314.8" y="9" width="90" height="24" rx="4"
+    fill="#111111" stroke="#3178c655" stroke-width="1"/>
+  <text x="359.8" y="25" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#3178c6">TypeScript</text>
+  <rect x="410.8" y="9" width="68.4" height="24" rx="4"
+    fill="#111111" stroke="#0078D455" stroke-width="1"/>
+  <text x="445" y="25" text-anchor="middle"
+    font-family="monospace" font-size="10" fill="#0078D4">Windows</text>
+</svg>
