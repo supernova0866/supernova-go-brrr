@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>supernova-go-brrr — desktop only</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #21262d;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --blue: #58a6ff;
+      --purple: #a371f7;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    /* star field */
+    .stars {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 28% 72%, rgba(255,255,255,.45) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 45% 35%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 85%, rgba(255,255,255,.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 22%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 88% 55%, rgba(255,255,255,.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  60%, rgba(255,255,255,.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 10%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 50%, rgba(255,255,255,.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 18% 42%, rgba(255,255,255,.45) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 68%, rgba(255,255,255,.5) 0%, transparent 100%);
+    }
+
+    /* grid */
+    .grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(48,54,61,.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(48,54,61,.35) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* glow blobs */
+    .glow {
+      position: fixed; z-index: 0; border-radius: 50%; filter: blur(80px); opacity: .12;
+    }
+    .glow-1 { width: 340px; height: 340px; top: -80px; left: -80px;  background: var(--purple); }
+    .glow-2 { width: 280px; height: 280px; bottom: -60px; right: -60px; background: var(--blue); }
+
+    /* content */
+    .container {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .icon {
+      width: 72px; height: 72px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 0 1px rgba(88,166,255,.12), 0 8px 32px rgba(0,0,0,.4);
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .35rem .85rem;
+      background: rgba(163,113,247,.1);
+      border: 1px solid rgba(163,113,247,.25);
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--purple);
+      letter-spacing: .04em;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--purple);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.5rem, 7vw, 2rem);
+      font-weight: 700;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #e6edf3 0%, #a371f7 50%, #58a6ff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sub {
+      font-size: .95rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 280px;
+    }
+
+    .sub strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .divider {
+      width: 48px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      opacity: .6;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.8); }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="grid"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="container">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      supernova-go-brrr
+    </div>
+
+    <div class="icon">💻</div>
+
+    <h1>desktop only</h1>
+
+    <p class="sub">
+      This tool is built for developers at their desk.<br/>
+      Open it on your <strong>laptop or desktop</strong> to get started.
+    </p>
+
+    <div class="divider"></div>
+
+    <p class="hint">github.com/supernova0866</p>
+  </div>
+</body>
+</html>
