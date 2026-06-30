@@ -1,0 +1,6 @@
+<svg viewBox="0 0 700 110" xmlns="http://www.w3.org/2000/svg" width="700" height="110">
+  <rect width="700" height="110" fill="#0d1117" rx="8"/>
+  <path d="M0,60 C100,30 200,90 350,55 C500,20 600,70 700,50 L700,110 L0,110 Z" fill="#1f2d3d"/>
+  <text x="350" y="48" text-anchor="middle" font-family="monospace" font-size="22" fill="#e6edf3" font-weight="700">supernova0866</text>
+  <text x="350" y="72" text-anchor="middle" font-family="monospace" font-size="12" fill="#58a6ff">full-stack dev · open source</text>
+</svg>
